@@ -7,5 +7,5 @@ If you found any bugs type them into issues or join to our discord server and wr
 Open command prompt in source directory.
 Type into command prompt: pip install -r requirements.txt
 And you're done! You have installed all libs.
-# How to compile (if u want lol)
-Use pyinstaller or something like that, thats all.
+# How to compile
+Use libraries that can compile from .py to .exe, do not be frightened by viruses, they are false because the compilation is done with MS Build.
