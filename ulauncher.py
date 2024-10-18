@@ -5,9 +5,9 @@ from uuid import uuid1
 from random_username.generate import generate_username
 import minecraft_launcher_lib
 from PyQt5.QtCore import QTimer, Qt
-
+#LOADER SELECT DOESN'T WORKING
 class LaunchThread(QtCore.QThread):
-    launch_setup_signal = QtCore.pyqtSignal(str, str, str)
+    launch_setup_signal = QtCore.pyqtSignal(str, str, str)  
     progress_update_signal = QtCore.pyqtSignal(int, int, str)
     state_update_signal = QtCore.pyqtSignal(bool)
     stop_signal = QtCore.pyqtSignal()
@@ -20,7 +20,7 @@ class LaunchThread(QtCore.QThread):
         self.progress_max = 0
         self.progress_label = ''
         self.stopping = False
-        self.loader_type = 'Vanilla'
+        self.loader_type = 'Vanilla'  
 
         self.launch_setup_signal.connect(self.launch_setup)
         self.stop_signal.connect(self.stop_launch)
@@ -28,7 +28,7 @@ class LaunchThread(QtCore.QThread):
     def launch_setup(self, version_id, username, loader_type='Vanilla'):
         self.version_id = version_id
         self.username = username
-        self.loader_type = loader_type
+        self.loader_type = loader_type  
         self.stopping = False
 
     def update_progress_label(self, value):
@@ -51,9 +51,13 @@ class LaunchThread(QtCore.QThread):
         self.update_progress_label("Fetching Forge versions")
         try:
             forge_version = minecraft_launcher_lib.forge.find_forge_version(self.version_id)
+            
             if forge_version is None:
                 print("This Minecraft Version is not supported by Forge")
-                return False
+                return
+
+            print(f"Available Forge versions: {forge_version}")
+            print(f"Installing Forge version: {forge_version}")
 
             minecraft_launcher_lib.forge.install_forge_version(
                 forge_version,
@@ -69,45 +73,10 @@ class LaunchThread(QtCore.QThread):
             return False
         return True
 
-    def install_fabric(self, minecraft_directory):
-        try:
-            self.update_progress_label("Installing Fabric")
-            minecraft_launcher_lib.fabric.install_fabric(
-                self.version_id,
-                minecraft_directory,
-                callback={
-                    'setStatus': self.update_progress_label,
-                    'setProgress': self.update_progress,
-                    'setMax': self.update_progress_max
-                }
-            )
-        except Exception as e:
-            print(f"Error during Fabric installation: {str(e)}")
-            return False
-        return True
-
-    def install_quilt(self, minecraft_directory):
-        try:
-            self.update_progress_label("Installing Quilt")
-            minecraft_launcher_lib.quilt.install_quilt(
-                self.version_id,
-                minecraft_directory,
-                callback={
-                    'setStatus': self.update_progress_label,
-                    'setProgress': self.update_progress,
-                    'setMax': self.update_progress_max
-                }
-            )
-        except Exception as e:
-            print(f"Error during Quilt installation: {str(e)}")
-            return False
-        return True
-
     def run(self):
-        minecraft_version = self.version_id.split('-')[0]
+        minecraft_version = self.version_id
         minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft', 'unixlauncher')
         self.state_update_signal.emit(True)
-
         try:
             minecraft_launcher_lib.install.install_minecraft_version(
                 versionid=minecraft_version,
@@ -119,26 +88,16 @@ class LaunchThread(QtCore.QThread):
                 }
             )
 
+
             if self.loader_type == 'Forge':
                 forge_installed = self.install_forge(minecraft_directory)
                 if not forge_installed:
                     return
-
                 forge_version_id = minecraft_launcher_lib.forge.find_forge_version(minecraft_version)
                 if forge_version_id:
                     self.version_id = forge_version_id
                 else:
                     raise Exception("Could not find Forge version")
-
-            elif self.loader_type == 'Fabric':
-                fabric_installed = self.install_fabric(minecraft_directory)
-                if not fabric_installed:
-                    return
-
-            elif self.loader_type == 'Quilt':
-                quilt_installed = self.install_quilt(minecraft_directory)
-                if not quilt_installed:
-                    return
 
             if not self.username:
                 self.username = generate_username()[0]
@@ -164,7 +123,6 @@ class LaunchThread(QtCore.QThread):
         finally:
             self.state_update_signal.emit(False)
 
-
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         latest_version = minecraft_launcher_lib.utils.get_latest_version()
@@ -172,7 +130,8 @@ class Ui_MainWindow(object):
         MainWindow.resize(980, 538)
         MainWindow.setMinimumSize(QtCore.QSize(980, 538))
         MainWindow.setMaximumSize(QtCore.QSize(980, 538))
-        MainWindow.setWindowFlags(Qt.FramelessWindowHint)
+        MainWindow.setWindowTitle("Unix Launcher")
+        self.setWindowFlags(Qt.FramelessWindowHint)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("assets/icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
@@ -271,21 +230,22 @@ class Ui_MainWindow(object):
         self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
         self.progressBar.setGeometry(QtCore.QRect(706, 301, 246, 38))
         self.progressBar.setStyleSheet("QProgressBar {\n"
-                                        "    border: 2px solid #fff;\n"
-                                        "    border-radius: 9px;\n"
-                                        "    text-align: center;\n"
-                                        "    font-size: 12px;\n"
-                                        "    font-weight: bold;\n"
-                                        "    color: white;\n"
-                                        "    background-color: transparent;\n"
-                                        "    padding: 4px;\n"
-                                        "    font-family: \"Play\";\n"
+                                        "    border: 2px solid #fff; /* Белая граница шириной 2px */\n"
+                                        "    border-radius: 9px;    /* Закругленные углы радиусом 7px */\n"
+                                        "    text-align: center;     /* Выравнивание текста по центру */\n"
+                                        "    font-size: 12px;        /* Размер шрифта */\n"
+                                        "    font-weight: bold;      /* Жирный шрифт */\n"
+                                        "    color: white;           /* Цвет текста */\n"
+                                        "    background-color: transparent; /* Прозрачный фон */\n"
+                                        "    padding: 4px;           /* Отступы внутри прогресс-бара */\n"
+                                        "    font-family: \"Play\";    /* Шрифт Play */\n"
                                         "}\n"
                                         "\n"
                                         "QProgressBar::chunk {\n"
-                                        "    background-color: #00B051;\n"
-                                        "    border-radius: 7px;\n"
-                                        "}")
+                                        "    background-color: #00B051; /* Цвет заливки прогресса */\n"
+                                        "    border-radius: 7px;        /* Закругленные углы для заливки радиусом 7px */\n"
+                                        "}\n"
+                                        "")
         self.progressBar.setProperty("value", 0)
         self.progressBar.setTextVisible(True)
         self.progressBar.setObjectName("progressBar")
@@ -324,8 +284,9 @@ class Ui_MainWindow(object):
                                         "QAbstractItemView {\n"
                                         "                background: #403f3f; \n"
                                         "                border: none;\n"
-                                        "                color: white;"
-                                        "            }")
+                                        "                color: white;" 
+                                        "            }"
+                                        "")
         self.versionSelect.setObjectName("versionSelect")
         for version in minecraft_launcher_lib.utils.get_version_list():
             self.versionSelect.addItem(version['id'])
@@ -336,12 +297,13 @@ class Ui_MainWindow(object):
         self.nameEdit.setStyleSheet("QLineEdit {\n"
                                         "    background-color: rgba(0,0,0,0);\n"
                                         "    color: white;\n"
-                                        "    font: \"Play\";\n"
+                                        "    font: \"Play\"; \n"
                                         "    border: 2px solid #cccccc;\n"
                                         "    border-radius: 9px;\n"
                                         "    padding: 4px;\n"
                                         "    font-size:  18px;\n"
-                                        "}")
+                                        "}\n"
+                                        "")
         self.nameEdit.setMaxLength(19)
         self.nameEdit.setObjectName("nameEdit")
         self.playButton = QtWidgets.QPushButton(self.centralwidget)
@@ -386,16 +348,32 @@ class Ui_MainWindow(object):
         self.svernutButton.enterEvent = self.svernutButton_enter_event
         self.svernutButton.leaveEvent = self.svernutButton_leave_event
 
+
         self.versionInfo = QtWidgets.QLabel(self.centralwidget)
         self.versionInfo.setGeometry(QtCore.QRect(732, 214, 196, 37))
         self.versionInfo.setStyleSheet("        QLabel {\n"
                                         "            color: white;\n"
-                                        "            text-align: center;\n"
+                                        "\n"
+                                        "            text-align: center;  \n"
                                         "            font-size: 32px;\n"
-                                        "}")
+                                        "\n"
+                                        "        }")
         self.versionInfo.setAlignment(QtCore.Qt.AlignCenter)
         self.versionInfo.setObjectName("versionInfo")
 
+        self.loaderInfo = QtWidgets.QLabel(self.centralwidget)
+        self.loaderInfo.setGeometry(QtCore.QRect(700, 250, 261, 20))
+        self.loaderInfo.setStyleSheet("QLabel {\n"
+                                        "    color: white;\n"
+                                        "    font-size: 16px;\n"
+                                        "                  display: flex;\n"
+                                        "                justify-content: center;\n"
+                                        "                align-items: center;\n"
+                                        "                text-align: center;\n"
+                                        "                height: 100%;\n"
+                                        "}")
+        self.loaderInfo.setAlignment(QtCore.Qt.AlignCenter)
+        self.loaderInfo.setObjectName("loaderInfo")
         self.closeButton = QtWidgets.QPushButton(self.centralwidget)
         self.closeButton.setGeometry(QtCore.QRect(931, 9, 40, 40))
         self.closeButton.setStyleSheet("QPushButton {\n"
@@ -412,108 +390,180 @@ class Ui_MainWindow(object):
 
         MainWindow.setCentralWidget(self.centralwidget)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-        # Инициализация потока запуска игры
+        self.nameEdit.setPlaceholderText("Введите никнейм")
+        self.versionInfo.setText(self.versionSelect.currentText())
+        self.loaderInfo.setText("Загрузчик: Vanilla")
+        
         self.launch_thread = LaunchThread()
         self.launch_thread.progress_update_signal.connect(self.update_progress)
-        self.launch_thread.state_update_signal.connect(self.set_launch_controls_state)
+        self.launch_thread.state_update_signal.connect(self.state_update)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.hide_progress_bar)
 
-        # Установка начального состояния
-        self.selected_loader = 'Vanilla'
-        self.update_loader_info()
+        self.create_unixlauncher_directory()
 
-    def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "UnixLauncher"))
-        self.nameEdit.setPlaceholderText(_translate("MainWindow", "Имя игрока"))
-        self.versionInfo.setText(_translate("MainWindow", self.versionSelect.currentText()))
+        saved_username = self.load_username()
+        if saved_username:
+            self.nameEdit.setText(saved_username)
+        self.stop_button.raise_()
+        self.versionSelect.currentIndexChanged.connect(self.update_version_info)
 
-    def update_loader_info(self):
-        self.loaderInfo.setText(f"Loader: {self.selected_loader}")
+        self.is_dragging = False
+        self.drag_start_pos = None
 
-    def select_forge(self):
-        self.selected_loader = 'Forge'
-        self.update_loader_info()
+    def hide_progress_bar(self):
+        self.progressBar.setVisible(False)
 
-    def select_fabric(self):
-        self.selected_loader = 'Fabric'
-        self.update_loader_info()
+    def save_username(self, username):
+        with open("saved_username.txt", "w") as file:
+            file.write(username)
 
-    def select_quilt(self):
-        self.selected_loader = 'Quilt'
-        self.update_loader_info()
-
-    def select_Vanilla(self):
-        self.selected_loader = 'Vanilla'
-        self.update_loader_info()
-
-    def update_progress(self, progress, progress_max, label):
-        self.progressBar.setVisible(True)
-        self.progressBar.setMaximum(progress_max)
-        self.progressBar.setValue(progress)
-        self.progressBar.setFormat(label)
-
-    def set_launch_controls_state(self, state):
-        self.playButton.setEnabled(not state)
-        self.stop_button.setVisible(state)
-        self.progressBar.setVisible(state)
-
-    def playButton_enter_event(self, event):
-        self.playButton.setIcon(QtGui.QIcon("assets/PlayButtonHover.png"))
-
-    def playButton_leave_event(self, event):
-        self.playButton.setIcon(QtGui.QIcon("assets/PlayButton.png"))
-
-    def stop_button_enter_event(self, event):
-        self.stop_button.setIcon(QtGui.QIcon("assets/StopButtonHover.png"))
-
-    def stop_button_leave_event(self, event):
-        self.stop_button.setIcon(QtGui.QIcon("assets/StopButton.png"))
-
-    def folderButton_enter_event(self, event):
-        self.folderButton.setIcon(QtGui.QIcon("assets/FolderButtonHover.png"))
-
-    def folderButton_leave_event(self, event):
-        self.folderButton.setIcon(QtGui.QIcon("assets/FolderButton.png"))
-
-    def svernutButton_enter_event(self, event):
-        self.svernutButton.setIcon(QtGui.QIcon("assets/SvernutHover.png"))
-
-    def svernutButton_leave_event(self, event):
-        self.svernutButton.setIcon(QtGui.QIcon("assets/Svernut.png"))
-
-    def closeButton_enter_event(self, event):
-        self.closeButton.setIcon(QtGui.QIcon("assets/CloseHover.png"))
-
-    def closeButton_leave_event(self, event):
-        self.closeButton.setIcon(QtGui.QIcon("assets/Close.png"))
-
-    def open_directory(self):
-        minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft', 'unixlauncher')
-        os.startfile(minecraft_directory)
-
-    def minimize_window(self):
-        MainWindow.showMinimized()
-
-    def close_window(self):
-        MainWindow.close()
+    def load_username(self):
+        if os.path.exists("saved_username.txt"):
+            with open("saved_username.txt", "r") as file:
+                return file.read().strip()
+        return None
 
     def launch_game(self):
-        version_id = self.versionSelect.currentText()
+        self.progressBar.setVisible(True)
         username = self.nameEdit.text()
-        self.launch_thread.launch_setup_signal.emit(version_id, username, self.selected_loader)
+        if username:
+            self.save_username(username)
+        loader_type = self.loaderInfo.text().split(": ")[-1]  # Получение типа загрузчика из loaderInfo
+        self.launch_thread.launch_setup_signal.emit(self.versionSelect.currentText(), username, loader_type)
         self.launch_thread.start()
+        self.stop_button.setVisible(True)
+        self.playButton.setDisabled(True)
 
+    def state_update(self, value):
+        self.playButton.setDisabled(value)
+        self.playButton.setEnabled(not value)
+        self.stop_button.setVisible(value)
+        self.progressBar.setVisible(value)
+        if not value and self.progressBar.value() == 100:
+            self.progressBar.setVisible(False)
+
+    def update_progress(self, progress, max_progress, label):
+        if max_progress > 0:
+            percentage = int(progress / max_progress * 100)
+        else:
+            percentage = 0
+        self.progressBar.setValue(progress)
+        self.progressBar.setMaximum(max_progress)
+        text = f"{percentage}% - {label}"
+        self.progressBar.setFormat(text)
+
+    def open_directory(self):
+        roaming_directory = os.path.join(os.getenv('APPDATA'), '.unixlauncher')
+        if os.path.exists(roaming_directory):
+            subprocess.Popen(['explorer', roaming_directory])
+        else:
+            QtWidgets.QMessageBox
+
+    def create_unixlauncher_directory(self):
+        roaming_directory = os.path.join(os.getenv('APPDATA'), '.unixlauncher')
+        if not os.path.exists(roaming_directory):
+            os.makedirs(roaming_directory)
+
+    def update_version_info(self):
+        selected_version = self.versionSelect.currentText()
+        self.versionInfo.setText(selected_version)
+
+    def select_forge(self):
+        self.loaderInfo.setText('Загрузчик: Forge')
+
+    def select_quilt(self):
+        self.loaderInfo.setText('Загрузчик: Quilt')
+
+    def select_fabric(self):
+        self.loaderInfo.setText('Загрузчик: Fabric')
+
+    def select_Vanilla(self):
+        self.loaderInfo.setText('Загрузчик: Vanilla')
+
+    def close_window(self):
+        self.close()
+
+    def minimize_window(self):
+        self.showMinimized()
+
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.LeftButton:
+            self.is_dragging = True
+            self.drag_start_pos = event.globalPos() - self.frameGeometry().topLeft()
+
+    def mouseMoveEvent(self, event):
+        if self.is_dragging:
+            self.move(event.globalPos() - self.drag_start_pos)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == QtCore.Qt.LeftButton:
+            self.is_dragging = False
+            
     def stop_game(self):
+        self.progressBar.setVisible(False)
+        self.stop_button.setVisible(False)
+        self.playButton.setEnabled(True)
         self.launch_thread.stop_signal.emit()
+
+    def playButton_leave_event(self, event):
+        if not self.playButton.isEnabled():
+            return
+        self.playButton.setIcon(QtGui.QIcon("assets/PlayButton.png"))
+
+    def playButton_enter_event(self, event):
+        if not self.playButton.isEnabled():
+            return
+        self.playButton.setIcon(QtGui.QIcon("assets/PlayButtonHover.png"))
+        
+    def stop_button_leave_event(self, event):
+        if not self.stop_button.isEnabled():
+            return
+        self.stop_button.setIcon(QtGui.QIcon("assets/StopButton.png"))
+
+    def stop_button_enter_event(self, event):
+        if not self.stop_button.isEnabled():
+            return
+        self.stop_button.setIcon(QtGui.QIcon("assets/StopButtonHover.png"))
+    def folderButton_leave_event(self, event):
+        if not self.folderButton.isEnabled():
+            return
+        self.folderButton.setIcon(QtGui.QIcon("assets/FolderButton.png.png"))
+
+    def folderButton_enter_event(self, event):
+        if not self.folderButton.isEnabled():
+            return
+        self.folderButton.setIcon(QtGui.QIcon("assets/FolderButtonHover.png"))
+
+    def closeButton_leave_event(self, event):
+        if not self.stop_button.isEnabled():
+            return
+        self.closeButton.setIcon(QtGui.QIcon("assets/Close.png"))
+
+    def closeButton_enter_event(self, event):
+        if not self.closeButton.isEnabled():
+            return
+        self.closeButton.setIcon(QtGui.QIcon("assets/CloseHover.png"))
+
+    def svernutButton_leave_event(self, event):
+        if not self.svernutButton.isEnabled():
+            return
+        self.svernutButton.setIcon(QtGui.QIcon("assets/Svernut.png"))
+
+    def svernutButton_enter_event(self, event):
+        if not self.svernutButton.isEnabled():
+            return
+        self.svernutButton.setIcon(QtGui.QIcon("assets/SvernutHover.png"))
+
+class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
+    window = MainWindow()
+    window.show()
     sys.exit(app.exec_())
+#LOADER SELECT DOESN'T WORKING
