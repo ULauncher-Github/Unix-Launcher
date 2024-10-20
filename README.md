@@ -1,11 +1,10 @@
 # ULauncher Github
-Unix Launcher is a open source launcher typed on python!
-Me and my friend created that launcher for a joke, but some people are interested of launcher, and we started work on it.
+Unix Launcher is an experiment, is it possible to make a good well-designed minecraft launcher in python only?
 Check out our discord! (russian only sorry, but we have english chat) https://discord.gg/BVpWyqr8E3
 If you found any bugs type them into issues or join to our discord server and write bug into "Bug" Forum.
 # How to launch
 Open command prompt in source directory.
 Type into command prompt: pip install -r requirements.txt
-And you're done! You have installed all libs.
+And you're done! You have installed all libs. And can now run source code or compile it
 # How to compile
-Use libraries that can compile from .py to .exe, do not be frightened by viruses, they are false because the compilation is done with MS Build.
+Use libraries that can compile from .py to .exe, do not be frightened by viruses, they are false because the compilation is done with Visual Studio MS Build Tools or smth
