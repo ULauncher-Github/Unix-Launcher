@@ -5,12 +5,13 @@ from uuid import uuid1
 from random_username.generate import generate_username
 import minecraft_launcher_lib
 from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtWidgets import QApplication, QComboBox, QStyledItemDelegate, QVBoxLayout, QWidget, QLineEdit
 from PyQt5.QtCore import Qt, QPoint
 
-class CenteredComboBox(QtWidgets.QProxyStyle):
-    def drawItemText(self, painter, rect, flags, pal, enabled, text, textRole):
-        flags |= QtCore.Qt.AlignCenter
-        super(CenteredComboBox, self).drawItemText(painter, rect, flags, pal, enabled, text, textRole)
+class CenterDelegate(QStyledItemDelegate):
+    def initStyleOption(self, option, index):
+        super().initStyleOption(option, index)
+        option.displayAlignment = Qt.AlignCenter
 
 class LaunchThread(QtCore.QThread):
     launch_setup_signal = QtCore.pyqtSignal(str, str, str)  
@@ -340,9 +341,12 @@ class Ui_MainWindow(object):
                 background: none;  /* Transparent background behind the handle */
             }
         """)
-        centeredStyle=CenteredComboBox()
-        self.versionSelectBox.setStyle(centeredStyle)
-        self.versionSelectBox.setEditable(False)
+        self.versionSelectBox.setEditable(True)
+        line_edit = self.versionSelectBox.lineEdit()
+        line_edit.setAlignment(Qt.AlignCenter)
+        line_edit.setReadOnly(True)
+        delegate = CenterDelegate(self.versionSelectBox)
+        self.versionSelectBox.setItemDelegate(delegate)
         self.versionSelectBox.setObjectName("versionSelectBox")
 
         for version in minecraft_launcher_lib.utils.get_version_list():
