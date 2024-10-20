@@ -340,7 +340,8 @@ class Ui_MainWindow(object):
                 background: none;  /* Transparent background behind the handle */
             }
         """)
-
+        centeredStyle=CenteredComboBox()
+        self.versionSelectBox.setStyle(centeredStyle)
         self.versionSelectBox.setEditable(False)
         self.versionSelectBox.setObjectName("versionSelectBox")
 
