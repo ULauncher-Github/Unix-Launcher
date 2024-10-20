@@ -472,9 +472,21 @@ class Ui_MainWindow(object):
         self.VanillaButton.setObjectName("VanillaButton")
         self.VanillaButton.clicked.connect(self.select_Vanilla)
 
+        self.dropdownarrowicon = QtWidgets.QLabel(self.centralwidget)
+        self.dropdownarrowicon.setGeometry(QtCore.QRect(935, 374, 16, 31))
+        self.dropdownarrowicon.setText("")
+        self.dropdownarrowicon.setPixmap(QtGui.QPixmap("../../../Downloads/imagefer.png"))
+        self.dropdownarrowicon.setStyleSheet("""
+        background-color: rgba(255,255,255,0);
+
+                                             """)
+        self.dropdownarrowicon.setAlignment(QtCore.Qt.AlignCenter)
+        self.dropdownarrowicon.setObjectName("dropdownarrowicon")
+
         self.GeneralBG.raise_()
         self.TopbarBG.raise_()
         self.Logo.raise_()
+        self.dropdownarrowicon.raise_()
         self.closeButton.raise_()
         self.VanillaButton.raise_()
         self.forgeButton.raise_()
