@@ -20,13 +20,11 @@ class InstallationWorker(QtCore.QThread):
         repo = "Unix-Launcher"
         exe_name = "ULauncher.exe"
 
-        # Check if the installation path exists
         install_path = self.install_path or os.getcwd()
         exe_path = self.find_exe_in_folder(install_path, exe_name)
 
         if exe_path:
                 print(Fore.GREEN + f"{exe_name} already exists at {exe_path}.")
-                # Optionally, run the application directly
                 if self.run_app_non_blocking(exe_path, os.path.dirname(exe_path)):
                         print(Fore.GREEN + "Application launched successfully.")
                         self.installation_complete.emit()
@@ -34,7 +32,6 @@ class InstallationWorker(QtCore.QThread):
                         print(Fore.RED + f"Failed to launch {exe_name}.")
                 return 
 
-        # Proceed with downloading and extracting if not found
         print(Fore.YELLOW + f"{exe_name} not found. Proceeding with installation...")
 
         release_data = self.get_latest_release(owner, repo)
@@ -153,7 +150,7 @@ class Ui_MainWindow(object):
         MainWindow.setMaximumSize(QtCore.QSize(574, 185))
         MainWindow.setStyleSheet("background-color: rgb(41, 46, 49);")
         MainWindow.setWindowTitle("ULauncher Setup")
-        icon_path = "assets/setup/Icon.png"
+        icon_path = "assets/Icon.png"
         icon = QtGui.QIcon(icon_path)
         MainWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -163,7 +160,7 @@ class Ui_MainWindow(object):
         self.logo.setGeometry(QtCore.QRect(32, 13, 523, 63))
         self.logo.setStyleSheet("background: transparent;")
         self.logo.setText("")
-        self.logo.setPixmap(QtGui.QPixmap("assets/setup/Logo.png"))
+        self.logo.setPixmap(QtGui.QPixmap("assets/Logo.png"))
         self.logo.setObjectName("logo")
 
         self.installButton = QtWidgets.QPushButton(self.centralwidget)
@@ -197,7 +194,7 @@ class Ui_MainWindow(object):
         "}")
         self.pathButton.setText("")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("assets/setup/folderIcon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("assets/folderIcon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pathButton.setIcon(icon)
         self.pathButton.setIconSize(QtCore.QSize(19, 17))
         self.pathButton.setObjectName("pathButton")
