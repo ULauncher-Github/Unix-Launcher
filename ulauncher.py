@@ -154,16 +154,18 @@ class Ui_MainWindow(object):
 
         self.playButton = QtWidgets.QPushButton(self.centralwidget)
         self.playButton.setGeometry(QtCore.QRect(708, 468, 246, 38))
-        self.playButton.setStyleSheet("QPushButton {\n"
-                                        "    background-color: rgba(70, 173, 226, 1);\n"
-                                        "    border-radius: 7px;\n"
-                                        "    font: 63 20pt \"Bahnschrift SemiBold\";\n"
-                                        "    color: white;\n"
-                                        "}\n"
-                                        "\n"
-                                        "QPushButton:Hover {\n"
-                                        "    background-color: rgba(56, 139, 181, 1)\n"
-                                        "}")
+        self.playButton.setStyleSheet("""
+        QPushButton {
+            background-color: rgba(70, 173, 226, 1);
+            border-radius: 7px;
+            font: 63 20pt "Bahnschrift SemiBold";
+            color: white;
+        }
+
+        QPushButton:Hover {
+            background-color: rgba(56, 139, 181, 1)
+        }
+        """)
         self.playButton.setIconSize(QtCore.QSize(16, 16))
         self.playButton.setObjectName("playButton")
         self.playButton.clicked.connect(self.launch_game)
@@ -184,27 +186,30 @@ class Ui_MainWindow(object):
         self.GeneralBG = QtWidgets.QLabel(self.centralwidget)
         self.GeneralBG.setGeometry(QtCore.QRect(686, 60, 290, 474))
         self.GeneralBG.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.GeneralBG.setStyleSheet("QLabel{\n"
-                                        "    background-color: rgba(35, 39, 43, 1);\n"
-                                        "    border-radius: 9px;\n"
-                                        "}\n"
-                                        "")
+        self.GeneralBG.setStyleSheet("""
+        QLabel{
+            background-color: rgba(35, 39, 43, 1);
+            border-radius: 9px;
+        }
+        """)
         self.GeneralBG.setText("")
         self.GeneralBG.setObjectName("GeneralBG")
 
         self.stopButton = QtWidgets.QPushButton(self.centralwidget)
         self.stopButton.setEnabled(True)
         self.stopButton.setGeometry(QtCore.QRect(708, 468, 246, 38))
-        self.stopButton.setStyleSheet("QPushButton {\n"
-                                        "    background-color: rgba(226, 70, 70, 1);\n"
-                                        "    border-radius: 7px;\n"
-                                        "    font: 63 20pt \"Bahnschrift SemiBold\";\n"
-                                        "    color: white\n"
-                                        "}\n"
-                                        "\n"
-                                        "QPushButton:Hover {\n"
-                                        "    background-color:rgba(157, 54, 54, 1)\n"
-                                        "}")
+        self.stopButton.setStyleSheet("""
+        QPushButton {
+            background-color: rgba(226, 70, 70, 1);
+            border-radius: 7px;
+            font: 63 20pt "Bahnschrift SemiBold";
+            color: white
+        }
+
+        QPushButton:Hover {
+            background-color:rgba(157, 54, 54, 1)
+        }
+        """)
         self.stopButton.setIconSize(QtCore.QSize(16, 16))
         self.stopButton.setObjectName("stopButton")
         self.stopButton.setVisible(False)
@@ -219,14 +224,16 @@ class Ui_MainWindow(object):
 
         self.nicknameEdit = QtWidgets.QLineEdit(self.centralwidget)
         self.nicknameEdit.setGeometry(QtCore.QRect(708, 420, 246, 38))
-        self.nicknameEdit.setStyleSheet("QLineEdit {\n"
-                                        "    background: transparent;\n"
-                                        "    border-radius: 7px;\n"
-                                        "    border: 2px solid white;\n"
-                                        "    color: white;\n"
-                                        "    font: 63 12pt \"Bahnschrift SemiBold\";\n"
-                                        "    text-align: center;\n"
-                                        "}")
+        self.nicknameEdit.setStyleSheet("""
+        QLineEdit {
+            background-color: rgba(255, 255, 255, 0);
+            border-radius: 7px;
+            border: 2px solid white;
+            color: white;
+            font: 63 12pt "Bahnschrift SemiBold";
+            text-align: center;
+        }
+        """)
         self.nicknameEdit.setAlignment(QtCore.Qt.AlignCenter)
         self.nicknameEdit.setObjectName("nicknameEdit")
 
@@ -242,55 +249,47 @@ class Ui_MainWindow(object):
                 text-align: center;
                 padding: 5px;
         }
-            QComboBox::drop-down {
-                background: transparent;
-                border: none;
-            }
-
-            QComboBox::down-arrow {
-                width: 14px;
-                height: 14px;
-            }
-
-            QComboBox::down-arrow:on { /* Arrow styling when clicked */
-                top: 1px;  /* Adjust to simulate arrow movement */
-            }
-
-            QAbstractItemView {
-                background: rgba(44, 44, 44, 1);
-                border: none;
-                color: white;
-                selection-background-color: #555555;  /* Selected item background */
-                selection-color: white;  /* Text color for selected item */
-                border-radius: 5px;  /* Smooth corners for the dropdown */
-                padding: 5px;
-            }
-
-            QScrollBar:vertical {
-                border: none;
-                background: #2f2f2f;  /* Dark background for the scrollbar */
-                width: 12px;
-                margin: 0px;
-                border-radius: 6px;  /* Rounded scrollbar for modern design */
-            }
-
-            QScrollBar::handle:vertical {
-                background-color: #888888;  /* Mid-gray color for the handle */
-                min-height: 20px;
-                border-radius: 6px;  /* Rounded handle */
-            }
-
-            QScrollBar::handle:vertical:hover {
-                background-color: #555555;  /* Darker handle on hover */
-            }
-
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-                background: none;  /* Hide the up/down buttons */
-            }
-
-            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-                background: none;  /* Transparent background behind the handle */
-            }
+        QComboBox::drop-down {
+            background: transparent;
+            border: none;
+        }
+        QComboBox::down-arrow {
+            width: 14px;
+            height: 14px;
+        }
+        QComboBox::down-arrow:on { 
+            top: 1px;
+        }
+        QAbstractItemView {
+            background: rgba(44, 44, 44, 1);
+            border: none;
+            color: white;
+            selection-background-color: #555555;
+            selection-color: white;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        QScrollBar:vertical {
+            border: none;
+            background: #2f2f2f;
+            width: 12px;
+            margin: 0px;
+            border-radius: 6px;
+        }
+        QScrollBar::handle:vertical {
+            background-color: #888888;
+            min-height: 20px;
+            border-radius: 6px;
+        }
+        QScrollBar::handle:vertical:hover {
+            background-color: #555555;
+        }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            background: none;
+        }
+        QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+            background: none;
+        }
         """)
         self.versionSelectBox.setEditable(True)
         line_edit = self.versionSelectBox.lineEdit()
@@ -305,24 +304,28 @@ class Ui_MainWindow(object):
         
         self.versionInfo = QtWidgets.QLabel(self.centralwidget)
         self.versionInfo.setGeometry(QtCore.QRect(705, 220, 256, 31))
-        self.versionInfo.setStyleSheet("QLabel{\n"
-                                        "    background: transparent;\n"
-                                        "    color: white;\n"
-                                        "    font: 63 20pt \"Bahnschrift SemiBold\";\n"
-                                        "    text-align: center;\n"
-                                        "}")
+        self.versionInfo.setStyleSheet("""
+        QLabel{
+            background-color: rgba(255, 255, 255, 0);
+            color: white;
+            font: 63 20pt "Bahnschrift SemiBold";
+            text-align: center;
+        }
+        """)
         self.versionInfo.setAlignment(QtCore.Qt.AlignCenter)
         self.versionInfo.setObjectName("versionInfo")
         self.versionInfo.setText(self.versionSelectBox.currentText())
 
         self.loaderInfo = QtWidgets.QLabel(self.centralwidget)
         self.loaderInfo.setGeometry(QtCore.QRect(705, 250, 256, 21))
-        self.loaderInfo.setStyleSheet("QLabel{\n"
-                                        "    background: transparent;\n"
-                                        "    color: white;\n"
-                                        "    font: 63 14pt \"Bahnschrift SemiBold\";\n"
-                                        "    text-align: center;\n"
-                                        "}")
+        self.loaderInfo.setStyleSheet("""
+        QLabel{
+            background-color: rgba(255, 255, 255, 0);
+            color: white;
+            font: 63 14pt "Bahnschrift SemiBold";
+            text-align: center;
+        }
+        """)
         self.loaderInfo.setAlignment(QtCore.Qt.AlignCenter)
         self.loaderInfo.setObjectName("loaderInfo")
         self.loaderInfo.setText("Loader: Vanilla")
@@ -355,68 +358,76 @@ class Ui_MainWindow(object):
 
         self.forgeButton = QtWidgets.QPushButton(self.centralwidget)
         self.forgeButton.setGeometry(QtCore.QRect(20, 100, 100, 40))
-        self.forgeButton.setStyleSheet("QPushButton {\n"
-                                       "    background: transparent;\n"
-                                       "    color: white;\n"
-                                       "    border: 2px solid #cccccc;\n"
-                                       "    border-radius: 9px;\n"
-                                       "    padding: 5px;\n"
-                                       "    font-size: 18px;\n"
-                                       "}\n"
-                                       "QPushButton:hover {\n"
-                                       "    background-color: #555;\n"
-                                       "}")
+        self.forgeButton.setStyleSheet("""
+        QPushButton {
+            background: transparent;
+            color: white;
+            border: 2px solid #cccccc;
+            border-radius: 9px;
+            padding: 5px;
+            font-size: 18px;
+        }
+            QPushButton:hover {
+            background-color: #555;
+        }
+        """)
         self.forgeButton.setText("Forge")
         self.forgeButton.setObjectName("forgeButton")
         self.forgeButton.clicked.connect(self.select_forge)
 
         self.quiltButton = QtWidgets.QPushButton(self.centralwidget)
         self.quiltButton.setGeometry(QtCore.QRect(20, 150, 100, 40))
-        self.quiltButton.setStyleSheet("QPushButton {\n"
-                                       "    background: transparent;\n"
-                                       "    color: white;\n"
-                                       "    border: 2px solid #cccccc;\n"
-                                       "    border-radius: 9px;\n"
-                                       "    padding: 5px;\n"
-                                       "    font-size: 18px;\n"
-                                       "}\n"
-                                       "QPushButton:hover {\n"
-                                       "    background-color: #555;\n"
-                                       "}")
+        self.quiltButton.setStyleSheet("""
+        QPushButton {
+            background: transparent;
+            color: white;
+            border: 2px solid #cccccc;
+            border-radius: 9px;
+            padding: 5px;
+            font-size: 18px;
+        }
+            QPushButton:hover {
+            background-color: #555;
+        }
+        """)
         self.quiltButton.setText("Quilt")
         self.quiltButton.setObjectName("quiltButton")
         self.quiltButton.clicked.connect(self.select_quilt)
 
         self.fabricButton = QtWidgets.QPushButton(self.centralwidget)
         self.fabricButton.setGeometry(QtCore.QRect(20, 200, 100, 40))
-        self.fabricButton.setStyleSheet("QPushButton {\n"
-                                        "    background: transparent;\n"
-                                        "    color: white;\n"
-                                        "    border: 2px solid #cccccc;\n"
-                                        "    border-radius: 9px;\n"
-                                        "    padding: 5px;\n"
-                                        "    font-size: 18px;\n"
-                                        "}\n"
-                                        "QPushButton:hover {\n"
-                                        "    background-color: #555;\n"
-                                        "}")
+        self.fabricButton.setStyleSheet("""
+        QPushButton {
+            background: transparent;
+            color: white;
+            border: 2px solid #cccccc;
+            border-radius: 9px;
+            padding: 5px;
+            font-size: 18px;
+        }
+            QPushButton:hover {
+            background-color: #555;
+        }
+        """)
         self.fabricButton.setText("Fabric")
         self.fabricButton.setObjectName("fabricButton")
         self.fabricButton.clicked.connect(self.select_fabric)
 
         self.VanillaButton = QtWidgets.QPushButton(self.centralwidget)
         self.VanillaButton.setGeometry(QtCore.QRect(20, 250, 100, 40))
-        self.VanillaButton.setStyleSheet("QPushButton {\n"
-                                        "    background: transparent;\n"
-                                        "    color: white;\n"
-                                        "    border: 2px solid #cccccc;\n"
-                                        "    border-radius: 9px;\n"
-                                        "    padding: 5px;\n"
-                                        "    font-size: 18px;\n"
-                                        "}\n"
-                                        "QPushButton:hover {\n"
-                                        "    background-color: #555;\n"
-                                        "}")
+        self.VanillaButton.setStyleSheet("""
+        QPushButton {
+            background: transparent;
+            color: white;
+            border: 2px solid #cccccc;
+            border-radius: 9px;
+            padding: 5px;
+            font-size: 18px;
+        }
+            QPushButton:hover {
+            background-color: #555;
+        }
+        """)
         self.VanillaButton.setText("Vanilla")
         self.VanillaButton.setObjectName("VanillaButton")
         self.VanillaButton.clicked.connect(self.select_Vanilla)
