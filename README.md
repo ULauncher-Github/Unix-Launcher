@@ -1,6 +1,6 @@
 # ULauncher Github
 Unix Launcher is an experiment, is it possible to make a good well-designed minecraft launcher in python only?
-Check out our discord! (russian only sorry, but we have english chat) https://discord.gg/BVpWyqr8E3
+Check out our discord! https://discord.gg/BVpWyqr8E3
 If you found any bugs type them into issues or join to our discord server and write bug into "Bug" Forum.
 # How to launch
 Open command prompt in source directory.
