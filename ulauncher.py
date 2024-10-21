@@ -53,14 +53,10 @@ class LaunchThread(QtCore.QThread):
         self.terminate()
 
     def run(self):
-
         minecraft_version = self.version_id
-
         minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft', 'unixlauncher')
         self.state_update_signal.emit(True)
-
         try:
-
             minecraft_launcher_lib.install.install_minecraft_version(
                 versionid=minecraft_version,
                 minecraft_directory=minecraft_directory,
@@ -80,13 +76,11 @@ class LaunchThread(QtCore.QThread):
                 'token': ""
             }
 
-
             command = minecraft_launcher_lib.command.get_minecraft_command(
                 version=self.version_id,
                 minecraft_directory=minecraft_directory,
                 options=options
             )
-
 
             if not self.stopping:
                 subprocess.Popen(command, creationflags=subprocess.CREATE_NO_WINDOW)
@@ -126,14 +120,14 @@ class Ui_MainWindow(object):
 
         self.Logo = QtWidgets.QLabel(self.centralwidget)
         self.Logo.setGeometry(QtCore.QRect(10, 10, 306, 37))
-        self.Logo.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
+        self.Logo.setStyleSheet("background: transparent;")
         self.Logo.setText("")
         self.Logo.setPixmap(QtGui.QPixmap("assets/Logo.png"))
         self.Logo.setObjectName("Logo")
 
         self.closeButton = QtWidgets.QPushButton(self.centralwidget)
         self.closeButton.setGeometry(QtCore.QRect(931, 8, 40, 40))
-        self.closeButton.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
+        self.closeButton.setStyleSheet("background: transparent;")
         self.closeButton.setText("")
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("assets/CloseButton.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -147,7 +141,7 @@ class Ui_MainWindow(object):
 
         self.collapseButton = QtWidgets.QPushButton(self.centralwidget)
         self.collapseButton.setGeometry(QtCore.QRect(891, 26, 24, 4))
-        self.collapseButton.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
+        self.collapseButton.setStyleSheet("background: transparent;")
         self.collapseButton.setText("")
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap("assets/CollapseButton.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -176,7 +170,7 @@ class Ui_MainWindow(object):
 
         self.folderButton = QtWidgets.QPushButton(self.centralwidget)
         self.folderButton.setGeometry(QtCore.QRect(948, 509, 22, 22))
-        self.folderButton.setStyleSheet("background-color: rgba(255, 255, 255, 0);background-color: rgba(255, 255, 255, 0);")
+        self.folderButton.setStyleSheet("background: transparent;")
         self.folderButton.setText("")
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap("assets/FolderButton.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -218,7 +212,7 @@ class Ui_MainWindow(object):
 
         self.previewImage = QtWidgets.QLabel(self.centralwidget)
         self.previewImage.setGeometry(QtCore.QRect(705, 70, 256, 144))
-        self.previewImage.setStyleSheet("background-color: rgba(0, 0, 0,0);")
+        self.previewImage.setStyleSheet("background: transparent;")
         self.previewImage.setText("")
         self.previewImage.setPixmap(QtGui.QPixmap("assets/PreviewImg_1.png"))
         self.previewImage.setObjectName("previewImage")
@@ -226,7 +220,7 @@ class Ui_MainWindow(object):
         self.nicknameEdit = QtWidgets.QLineEdit(self.centralwidget)
         self.nicknameEdit.setGeometry(QtCore.QRect(708, 420, 246, 38))
         self.nicknameEdit.setStyleSheet("QLineEdit {\n"
-                                        "    background-color: rgba(255, 255, 255, 0);\n"
+                                        "    background: transparent;\n"
                                         "    border-radius: 7px;\n"
                                         "    border: 2px solid white;\n"
                                         "    color: white;\n"
@@ -240,7 +234,7 @@ class Ui_MainWindow(object):
         self.versionSelectBox.setGeometry(QtCore.QRect(708, 370, 246, 38))
         self.versionSelectBox.setStyleSheet("""
         QComboBox {
-                background-color: rgba(255, 255, 255, 0);
+                background: transparent;
                 border-radius: 7px;
                 border: 2px solid white;
                 color: white;
@@ -312,7 +306,7 @@ class Ui_MainWindow(object):
         self.versionInfo = QtWidgets.QLabel(self.centralwidget)
         self.versionInfo.setGeometry(QtCore.QRect(705, 220, 256, 31))
         self.versionInfo.setStyleSheet("QLabel{\n"
-                                        "    background-color: rgba(255, 255, 255, 0);\n"
+                                        "    background: transparent;\n"
                                         "    color: white;\n"
                                         "    font: 63 20pt \"Bahnschrift SemiBold\";\n"
                                         "    text-align: center;\n"
@@ -324,7 +318,7 @@ class Ui_MainWindow(object):
         self.loaderInfo = QtWidgets.QLabel(self.centralwidget)
         self.loaderInfo.setGeometry(QtCore.QRect(705, 250, 256, 21))
         self.loaderInfo.setStyleSheet("QLabel{\n"
-                                        "    background-color: rgba(255, 255, 255, 0);\n"
+                                        "    background: transparent;\n"
                                         "    color: white;\n"
                                         "    font: 63 14pt \"Bahnschrift SemiBold\";\n"
                                         "    text-align: center;\n"
@@ -337,7 +331,7 @@ class Ui_MainWindow(object):
         self.progressBar.setGeometry(QtCore.QRect(708, 320, 246, 38))
         self.progressBar.setStyleSheet("""
         QProgressBar {
-                background-color: rgba(255, 255, 255, 0);
+                background: transparent;
                 border-radius: 7px;
                 border: 2px solid white;
                 color: white;
@@ -354,17 +348,15 @@ class Ui_MainWindow(object):
         self.progressBar.setObjectName("progressBar")
         self.progressBar.setVisible(False)
 
-        self.notWorkingWarn=QtWidgets.QLabel(self.centralwidget)
-        self.notWorkingWarn.setGeometry(QtCore.QRect(20, 50, 300, 60))
-        self.notWorkingWarn.setText("Warning! Loader select are not working correctly.")
-        self.notWorkingWarn.setStyleSheet("""
-                    color: white;                      
-        """)
+        self.warningLabel=QtWidgets.QLabel(self.centralwidget)
+        self.warningLabel.setGeometry(QtCore.QRect(20, 50, 300, 60))
+        self.warningLabel.setText("Warning! Loader select are just placeholder for now.")
+        self.warningLabel.setStyleSheet("color: white;")
 
         self.forgeButton = QtWidgets.QPushButton(self.centralwidget)
         self.forgeButton.setGeometry(QtCore.QRect(20, 100, 100, 40))
         self.forgeButton.setStyleSheet("QPushButton {\n"
-                                       "    background-color: rgba(0,0,0,0);\n"
+                                       "    background: transparent;\n"
                                        "    color: white;\n"
                                        "    border: 2px solid #cccccc;\n"
                                        "    border-radius: 9px;\n"
@@ -381,7 +373,7 @@ class Ui_MainWindow(object):
         self.quiltButton = QtWidgets.QPushButton(self.centralwidget)
         self.quiltButton.setGeometry(QtCore.QRect(20, 150, 100, 40))
         self.quiltButton.setStyleSheet("QPushButton {\n"
-                                       "    background-color: rgba(0,0,0,0);\n"
+                                       "    background: transparent;\n"
                                        "    color: white;\n"
                                        "    border: 2px solid #cccccc;\n"
                                        "    border-radius: 9px;\n"
@@ -398,7 +390,7 @@ class Ui_MainWindow(object):
         self.fabricButton = QtWidgets.QPushButton(self.centralwidget)
         self.fabricButton.setGeometry(QtCore.QRect(20, 200, 100, 40))
         self.fabricButton.setStyleSheet("QPushButton {\n"
-                                        "    background-color: rgba(0,0,0,0);\n"
+                                        "    background: transparent;\n"
                                         "    color: white;\n"
                                         "    border: 2px solid #cccccc;\n"
                                         "    border-radius: 9px;\n"
@@ -415,7 +407,7 @@ class Ui_MainWindow(object):
         self.VanillaButton = QtWidgets.QPushButton(self.centralwidget)
         self.VanillaButton.setGeometry(QtCore.QRect(20, 250, 100, 40))
         self.VanillaButton.setStyleSheet("QPushButton {\n"
-                                        "    background-color: rgba(0,0,0,0);\n"
+                                        "    background: transparent;\n"
                                         "    color: white;\n"
                                         "    border: 2px solid #cccccc;\n"
                                         "    border-radius: 9px;\n"
@@ -433,10 +425,8 @@ class Ui_MainWindow(object):
         self.dropdownarrowicon.setGeometry(QtCore.QRect(935, 374, 16, 31))
         self.dropdownarrowicon.setText("")
         self.dropdownarrowicon.setPixmap(QtGui.QPixmap("assets/arrow_down.png"))
-        self.dropdownarrowicon.setStyleSheet("""
-        background-color: rgba(255,255,255,0);
+        self.dropdownarrowicon.setStyleSheet("background: transparent;")
 
-                                             """)
         self.dropdownarrowicon.setAlignment(QtCore.Qt.AlignCenter)
         self.dropdownarrowicon.setObjectName("dropdownarrowicon")
 
