@@ -475,7 +475,7 @@ class Ui_MainWindow(object):
         self.dropdownarrowicon = QtWidgets.QLabel(self.centralwidget)
         self.dropdownarrowicon.setGeometry(QtCore.QRect(935, 374, 16, 31))
         self.dropdownarrowicon.setText("")
-        self.dropdownarrowicon.setPixmap(QtGui.QPixmap("../../../Downloads/imagefer.png"))
+        self.dropdownarrowicon.setPixmap(QtGui.QPixmap("assets/arrow_down.png"))
         self.dropdownarrowicon.setStyleSheet("""
         background-color: rgba(255,255,255,0);
 
