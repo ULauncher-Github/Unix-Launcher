@@ -27,14 +27,13 @@ class LaunchThread(QtCore.QThread):
         self.progress_max = 0
         self.progress_label = ''
         self.stopping = False
-        self.loader_type = 'Vanilla'  
+
         self.launch_setup_signal.connect(self.launch_setup)
         self.stop_signal.connect(self.stop_launch)
 
-    def launch_setup(self, version_id, username, loader_type='Vanilla'):
+    def launch_setup(self, version_id, username):
         self.version_id = version_id
         self.username = username
-        self.loader_type = loader_type  
         self.stopping = False
 
     def update_progress_label(self, value):
@@ -52,35 +51,6 @@ class LaunchThread(QtCore.QThread):
     def stop_launch(self):
         self.stopping = True
         self.terminate()
-
-    def install_forge(self, minecraft_directory):
-        self.update_progress_label("Fetching Forge versions")
-        try:
-            forge_version = minecraft_launcher_lib.forge.find_forge_version(self.version_id)
-            
-
-            if forge_version is None:
-                print("This Minecraft Version is not supported by Forge")
-                return
-
-
-            print(f"Available Forge versions: {forge_version}")
-            print(f"Installing Forge version: {forge_version}")
-
-
-            minecraft_launcher_lib.forge.install_forge_version(
-                forge_version,
-                minecraft_directory,
-                callback={
-                    'setStatus': self.update_progress_label,
-                    'setProgress': self.update_progress,
-                    'setMax': self.update_progress_max
-                }
-            )
-        except Exception as e:
-            print(f"Error during Forge installation: {str(e)}")
-            return False
-        return True
 
     def run(self):
 
@@ -100,19 +70,6 @@ class LaunchThread(QtCore.QThread):
                     'setMax': self.update_progress_max
                 }
             )
-
-
-            if self.loader_type == 'Forge':
-                forge_installed = self.install_forge(minecraft_directory)
-                if not forge_installed:
-                    return
-
-
-                forge_version_id = minecraft_launcher_lib.forge.find_forge_version(minecraft_version)
-                if forge_version_id:
-                    self.version_id = forge_version_id
-                else:
-                    raise Exception("Could not find Forge version")
 
             if not self.username:
                 self.username = generate_username()[0]
