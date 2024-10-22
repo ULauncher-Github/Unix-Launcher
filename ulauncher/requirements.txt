@@ -1,0 +1,4 @@
+pyqt5
+minecraft-launcher-lib
+uuid
+random-username
