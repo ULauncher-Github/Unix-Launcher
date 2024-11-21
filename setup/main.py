@@ -188,7 +188,7 @@ class Ui_MainWindow(object):
         MainWindow.setMinimumSize(QtCore.QSize(574, 185))
         MainWindow.setMaximumSize(QtCore.QSize(574, 185))
         MainWindow.setStyleSheet("background-color: rgb(41, 46, 49);")
-        MainWindow.setWindowTitle("Unix-Launcher Setup")
+        MainWindow.setWindowTitle("Unix-Setup")
         icon_path = "assets/Icon.png"
         icon = QtGui.QIcon(icon_path)
         MainWindow.setWindowIcon(icon)
@@ -199,7 +199,7 @@ class Ui_MainWindow(object):
         self.logo.setGeometry(QtCore.QRect(32, 13, 523, 63))
         self.logo.setStyleSheet("background: transparent;")
         self.logo.setText("")
-        self.logo.setPixmap(QtGui.QPixmap(https://raw.githubusercontent.com/ULauncher-Github/Unix-Launcher/refs/heads/dev/setup/assets/Logo.png))
+        self.logo.setPixmap(QtGui.QPixmap("assets/Logo.png"))
         self.logo.setObjectName("logo")
 
         self.installButton = QtWidgets.QPushButton(self.centralwidget)
@@ -262,7 +262,7 @@ class Ui_MainWindow(object):
         self.pathText = QtWidgets.QLabel(self.centralwidget)
         self.pathText.setGeometry(QtCore.QRect(277, 75, 59, 12))
         self.pathText.setStyleSheet("background: transparent; color: white;")
-        self.pathText.setText("Path Select")
+        self.pathText.setText("Select Path")
 
         self.shortcutCheckBox = QtWidgets.QCheckBox(self.centralwidget)
         self.shortcutCheckBox.setGeometry(QtCore.QRect(330, 93, 221, 31))
@@ -321,7 +321,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-        self.installButton.setText("Launch")
+        self.installButton.setText("Install")
         self.shortcutCheckBox.setText("Create a desktop shortcut")
         self.appCheckBox.setText("Open program after install")
 
