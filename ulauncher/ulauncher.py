@@ -1,20 +1,158 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
-import os
-import subprocess
-from uuid import uuid1
-from random_username.generate import generate_username
-import minecraft_launcher_lib
-from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import QApplication, QComboBox, QStyledItemDelegate, QVBoxLayout, QWidget, QLineEdit
-from PyQt5.QtCore import Qt, QPoint
+try:
+    from PyQt5 import QtCore, QtGui, QtWidgets
+    import os
+    import subprocess
+    from uuid import uuid1
+    from random_username.generate import generate_username
+    import minecraft_launcher_lib
+    from PyQt5.QtCore import QTimer, Qt
+    from PyQt5.QtWidgets import QApplication, QComboBox, QStyledItemDelegate, QVBoxLayout, QWidget, QLineEdit
+    from PyQt5.QtCore import Qt, QPoint
+    import json
+    import pygetwindow as gw
+    import time
+    from PyQt5.QtGui import QStandardItem, QStandardItemModel
+    import psutil
+    from asyncqt import QEventLoop
+    import asyncio
+    import requests
+    from urllib.parse import urlparse, parse_qs, unquote
+    from PyQt5.QtWidgets import QApplication, QMainWindow
+    from PyQt5.QtCore import QUrl, pyqtSlot
+    from PyQt5.QtWebEngineWidgets import QWebEngineView
+    import threading
+except Exception as e:
+    code = os.system("python.exe -m pip install -r requirements.txt") #requirements doesnt updated.
+    print(e)
 
 class CenterDelegate(QStyledItemDelegate):
     def initStyleOption(self, option, index):
         super().initStyleOption(option, index)
         option.displayAlignment = Qt.AlignCenter
 
+class MicrosoftAuthenticationException(Exception):
+    pass
+
+class AuthTokens:
+    def __init__(self, access_token, refresh_token):
+        self.access_token = access_token
+        self.refresh_token = refresh_token
+
+class MicrosoftAuthenticator:
+    AUTH_URL = "https://login.live.com/oauth20_authorize.srf"
+    TOKEN_URL = "https://login.live.com/oauth20_token.srf"
+    MINECRAFT_URLS = {
+        "auth": "https://api.minecraftservices.com/authentication/login_with_xbox",
+        "store": "https://api.minecraftservices.com/entitlements/mcstore",
+        "profile": "https://api.minecraftservices.com/minecraft/profile"
+    }
+    CLIENT_ID = "000000004C12AE6F"
+    SCOPE = "service::user.auth.xboxlive.com::MBI_SSL"
+
+    def __init__(self):
+        self.session = requests.Session()
+
+    async def login_with_webview(self):
+        try:
+            tokens = self.extract_tokens(await LoginFrame().start(self.get_auth_url()))
+            return await self.authenticate(tokens)
+        except MicrosoftAuthenticationException as e:
+            print("Authentication failed:", e)
+
+    async def authenticate(self, tokens):
+        xbox_token = self.xbox_login(tokens.access_token)
+        xsts_token, user_hash = self.xsts_login(xbox_token)
+        mc_token = self.mc_login(user_hash, xsts_token)
+        profile = self.get_mc_profile(mc_token) if self.has_entitlement(mc_token) else None
+
+        self.save_to_json(mc_token, profile)
+
+        return {"profile": profile, "access_token": mc_token, "refresh_token": tokens.refresh_token}
+
+    def xbox_login(self, token):
+        data = {"Properties": {"AuthMethod": "RPS", "SiteName": "user.auth.xboxlive.com", "RpsTicket": token},
+                "RelyingParty": "http://auth.xboxlive.com", "TokenType": "JWT"}
+        return self.session.post("https://user.auth.xboxlive.com/user/authenticate", json=data).json()['Token']
+    
+    def xsts_login(self, xbox_token):
+        data = {"Properties": {"SandboxId": "RETAIL", "UserTokens": [xbox_token]},
+                "RelyingParty": "rp://api.minecraftservices.com/", "TokenType": "JWT"}
+        response = self.session.post("https://xsts.auth.xboxlive.com/xsts/authorize", json=data).json()
+        return response['Token'], response['DisplayClaims']['xui'][0]['uhs']
+
+    def mc_login(self, user_hash, xsts_token):
+        data = {"identityToken": f"XBL3.0 x={user_hash};{xsts_token}"}
+        return self.session.post(self.MINECRAFT_URLS['auth'], json=data).json()['access_token']
+
+    def has_entitlement(self, token):
+        headers = {"Authorization": f"Bearer {token}"}
+        items = self.session.get(self.MINECRAFT_URLS['store'], headers=headers).json().get('items', [])
+        return any(item.get('name') == "game_minecraft" for item in items)
+
+    def get_mc_profile(self, token):
+        headers = {"Authorization": f"Bearer {token}"}
+        return self.session.get(self.MINECRAFT_URLS['profile'], headers=headers).json()
+
+    def extract_tokens(self, url):
+        params = parse_qs(urlparse(url).fragment)
+        access_token = params.get("access_token", [None])[0]
+        refresh_token = params.get("refresh_token", [None])[0]
+        if not access_token or not refresh_token:
+            raise MicrosoftAuthenticationException("Invalid tokens")
+        return AuthTokens(unquote(access_token), unquote(refresh_token))
+
+    def get_auth_url(self):
+        return f"{self.AUTH_URL}?client_id={self.CLIENT_ID}&redirect_uri=https://login.live.com/oauth20_desktop.srf&scope={self.SCOPE}&response_type=token"
+
+    def save_to_json(self, mc_token, profile):
+        if profile:
+            user_data = {
+                "access_token": mc_token,
+                "uuid": profile.get("id"),
+                "username": profile.get("name")
+            }
+            with open('auth_data.json', 'w') as f:
+                json.dump(user_data, f, indent=4)
+            print("Saved data to auth_data.json")
+
+class LoginFrame(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Microsoft Authentication")
+        self.setGeometry(100, 100, 750, 750)
+        self.web_view = QWebEngineView(self)
+        self.setCentralWidget(self.web_view)
+        self.future = asyncio.Future()
+        self.web_view.page().loadFinished.connect(self.override_user_agent)
+        self.web_view.urlChanged.connect(self.check_url)
+
+    def override_user_agent(self):
+        js_code = """
+            Object.defineProperty(navigator, 'userAgent', {
+                get: () => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36"
+            });
+        """
+        self.web_view.page().runJavaScript(js_code)
+
+    async def start(self, url):
+        self.show()
+        self.web_view.setUrl(QUrl(url))
+        return await self.future
+
+    @pyqtSlot("QUrl")
+    def check_url(self, url):
+        if "access_token" in url.toString():
+            self.hide()
+            if not self.future.done():
+                self.future.set_result(url.toString())
+
+    def closeEvent(self, event):
+        if not self.future.done():
+            self.future.set_exception(MicrosoftAuthenticationException("User closed the authentication window"))
+        event.accept()
+
 class LaunchThread(QtCore.QThread):
-    launch_setup_signal = QtCore.pyqtSignal(str, str, str)  
+    launch_setup_signal = QtCore.pyqtSignal(str, str, QLineEdit, bool)  
     progress_update_signal = QtCore.pyqtSignal(int, int, str)
     state_update_signal = QtCore.pyqtSignal(bool)
     stop_signal = QtCore.pyqtSignal()
@@ -31,10 +169,12 @@ class LaunchThread(QtCore.QThread):
         self.launch_setup_signal.connect(self.launch_setup)
         self.stop_signal.connect(self.stop_launch)
 
-    def launch_setup(self, version_id, username):
+    def launch_setup(self, version_id, username, nicknameEdit, IsLicense):
         self.version_id = version_id
         self.username = username
+        self.IsLicense=IsLicense
         self.stopping = False
+        self.nicknameEdit=nicknameEdit
 
     def update_progress_label(self, value):
         self.progress_label = value
@@ -53,6 +193,7 @@ class LaunchThread(QtCore.QThread):
         self.terminate()
 
     def run(self):
+        print(self.IsLicense)
         minecraft_version = self.version_id
         minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft', 'unixlauncher')
         self.state_update_signal.emit(True)
@@ -70,17 +211,26 @@ class LaunchThread(QtCore.QThread):
             if not self.username:
                 self.username = generate_username()[0]
 
-            options = {
-                'username': self.username,
-                'uuid': str(uuid1()),
-                'token': ""
-            }
+            if self.IsLicense==True:
+                with open('auth_data.json', 'r', encoding='utf-8') as file:
+                    license_data = json.load(file)
+                options = {
+                    'username': license_data.get("username"),
+                    'uuid': license_data.get("uuid"),
+                    'token': license_data.get("access_token"),
+                }
+            else:
+                options = {
+                    'username': self.username,
+                    'uuid': str(uuid1()),
+                    'token': "",
+                }
 
             command = minecraft_launcher_lib.command.get_minecraft_command(
                 version=self.version_id,
                 minecraft_directory=minecraft_directory,
                 options=options
-            )
+            ) 
 
             if not self.stopping:
                 subprocess.Popen(command, creationflags=subprocess.CREATE_NO_WINDOW)
@@ -91,9 +241,274 @@ class LaunchThread(QtCore.QThread):
         finally:
             self.state_update_signal.emit(False)
 
+class SettingsWindow(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(SettingsWindow, self).__init__()
+        self.authenticator = MicrosoftAuthenticator()
+        self.loop = QEventLoop()
+        asyncio.set_event_loop(self.loop)
+        self.auth_data_file = "auth_data.json"
+
+        self.setObjectName("MainWindow")
+        self.resize(413, 167)
+        self.setStyleSheet("background-color: rgb(41, 46, 49);")
+        self.setWindowTitle("Settings")
+        self.setMinimumSize(QtCore.QSize(413, 167))
+        self.setMaximumSize(QtCore.QSize(413, 167))
+
+        icon_path = "assets/Icon.png"
+        icon = QtGui.QIcon(icon_path)
+        self.setWindowIcon(icon)
+        self.centralwidget = QtWidgets.QWidget(self)
+        self.centralwidget.setObjectName("centralwidget")
+
+        self.Memory_Label = QtWidgets.QLabel(self.centralwidget)
+        self.Memory_Label.setGeometry(QtCore.QRect(20, 20, 47, 13))
+        self.Memory_Label.setStyleSheet("color: white;")
+        self.Memory_Label.setObjectName("Memory_Label")
+
+        self.MemorySlider = QtWidgets.QSlider(self.centralwidget)
+        self.MemorySlider.setGeometry(QtCore.QRect(70, 17, 160, 21))
+        self.MemorySlider.setOrientation(QtCore.Qt.Horizontal)
+        self.MemorySlider.setObjectName("MemorySlider")
+        self.MemorySlider.setMinimum(512)
+        max_memory_mb = psutil.virtual_memory().total // (1024 * 1024)
+        self.MemorySlider.setMaximum(max_memory_mb)
+        self.MemorySlider.setTickPosition(QtWidgets.QSlider.TicksBelow)
+        self.MemorySlider.setTickInterval(512)
+        self.MemorySlider.setPageStep(512)
+        self.predefined_values = [512 * i for i in range(1, (max_memory_mb // 512) + 1)]
+        self.jvm_args = []
+        self.MemorySlider.valueChanged.connect(self.update_memory_stat)
+
+        self.MemoryStat = QtWidgets.QLabel(self.centralwidget)
+        self.MemoryStat.setGeometry(QtCore.QRect(240, 20, 47, 13))
+        self.MemoryStat.setStyleSheet("color: white;")
+        self.MemoryStat.setObjectName("MemoryStat")
+        self.MemoryStat.setText(f"{self.MemorySlider.value()}MB")
+
+        self.PathToJava = QtWidgets.QLineEdit(self.centralwidget)
+        self.PathToJava.setGeometry(QtCore.QRect(75, 47, 201, 20))
+        self.PathToJava.setStyleSheet(
+            "background: transparent;"
+            "border-radius: 7px;"
+            "border: 2px solid white;"
+            "color: white;"
+            "font: 63 10pt 'Bahnschrift SemiBold';"
+            "text-align: center;"
+        )
+        self.PathToJava.setObjectName("PathToJava")
+        self.PathToJava.textChanged.connect(self.update_pathtojavaexe)
+
+        self.JavaPath_Label = QtWidgets.QLabel(self.centralwidget)
+        self.JavaPath_Label.setGeometry(QtCore.QRect(20, 50, 47, 13))
+        self.JavaPath_Label.setStyleSheet("color: white;")
+        self.JavaPath_Label.setObjectName("JavaPath_Label")
+
+        self.Releases = QtWidgets.QCheckBox(self.centralwidget)
+        self.Releases.setGeometry(QtCore.QRect(20, 115, 101, 17))
+        self.Releases.setStyleSheet("color: white;")
+        self.Releases.setObjectName("Releases")
+        self.Releases.stateChanged.connect(self.update_versionStates)
+
+        self.BetaVersions = QtWidgets.QCheckBox(self.centralwidget)
+        self.BetaVersions.setGeometry(QtCore.QRect(20, 140, 121, 17))
+        self.BetaVersions.setStyleSheet("color: white;")
+        self.BetaVersions.setObjectName("BetaVersions")
+        self.BetaVersions.stateChanged.connect(self.update_versionStates)
+
+        self.RCVersions = QtWidgets.QCheckBox(self.centralwidget)
+        self.RCVersions.setGeometry(QtCore.QRect(147, 140, 111, 17))
+        self.RCVersions.setStyleSheet("color: white;")
+        self.RCVersions.setObjectName("RCVersions")
+        self.RCVersions.stateChanged.connect(self.update_versionStates)
+
+        self.Snapshots = QtWidgets.QCheckBox(self.centralwidget)
+        self.Snapshots.setGeometry(QtCore.QRect(270, 115, 121, 17))
+        self.Snapshots.setStyleSheet("color: white;")
+        self.Snapshots.setObjectName("Snapshots")
+        self.Snapshots.stateChanged.connect(self.update_versionStates)
+
+        self.PreReleases = QtWidgets.QCheckBox(self.centralwidget)
+        self.PreReleases.setGeometry(QtCore.QRect(147, 115, 111, 17))
+        self.PreReleases.setStyleSheet("color: white;")
+        self.PreReleases.setObjectName("PreReleases")
+        self.PreReleases.stateChanged.connect(self.update_versionStates)
+        
+        self.AlphaVersions = QtWidgets.QCheckBox(self.centralwidget)
+        self.AlphaVersions.setGeometry(QtCore.QRect(270, 140, 131, 17))
+        self.AlphaVersions.setStyleSheet("color: white;")
+        self.AlphaVersions.setObjectName("AlphaVersions")
+        self.AlphaVersions.stateChanged.connect(self.update_versionStates)
+        
+        self.LicenseProfile = QtWidgets.QCheckBox(self.centralwidget)
+        self.LicenseProfile.setGeometry(QtCore.QRect(300, 20, 101, 17))
+        self.LicenseProfile.setStyleSheet("color: white;")
+        self.LicenseProfile.setObjectName("LicenseProfile")
+        self.LicenseProfile.stateChanged.connect(self.on_checkbox_state_change)
+
+        self.CrackedProfile = QtWidgets.QCheckBox(self.centralwidget)
+        self.CrackedProfile.setGeometry(QtCore.QRect(300, 50, 101, 17))
+        self.CrackedProfile.setStyleSheet("color: white;")
+        self.CrackedProfile.setObjectName("CrackedProfile")
+        self.CrackedProfile.stateChanged.connect(self.on_checkbox_state_change)
+
+        if os.path.exists("auth_data.json"):
+            self.LicenseProfile.setChecked(True)
+            self.LicenseProfile.setEnabled(False)
+            self.CrackedProfile.setChecked(False)
+        else:
+            self.LicenseProfile.setChecked(False)
+            self.LicenseProfile.setEnabled(True)
+            self.CrackedProfile.setChecked(True)
+
+        self.SelectJavaExeButton = QtWidgets.QPushButton(self.centralwidget)
+        self.SelectJavaExeButton.setGeometry(QtCore.QRect(20, 80, 381, 23))
+        self.SelectJavaExeButton.setStyleSheet(
+            "QPushButton { background-color: rgba(70, 173, 226, 1); border-radius: 7px; font: 63 8pt 'Bahnschrift SemiBold'; color: white; }"
+            "QPushButton:Hover { background-color: rgba(56, 139, 181, 1) }"
+        )
+        self.SelectJavaExeButton.setObjectName("SelectJavaExeButton")
+        self.SelectJavaExeButton.clicked.connect(self.select_java_exe)
+
+        self.setCentralWidget(self.centralwidget)
+        self.Memory_Label.setText("Memory")
+        self.JavaPath_Label.setText("Java Exe")
+        self.Releases.setText("Hide Releases")
+        self.BetaVersions.setText("Hide Beta Versions")
+        self.RCVersions.setText("Hide RC Versions")
+        self.Snapshots.setText("Hide Snapshots")
+        self.PreReleases.setText("Hide Pre-releases")
+        self.AlphaVersions.setText("Hide Alpha Versions")
+        self.LicenseProfile.setText("License Profile")
+        self.CrackedProfile.setText("Cracked Profile")
+        self.MemoryStat.setText(f"{self.MemorySlider.value()}MB")
+        self.SelectJavaExeButton.setText("Select Java Exe")
+
+
+    def update_memory_stat(self):
+        # Get the current value from the slider
+        memory_value = self.MemorySlider.value()
+
+        # Find the closest predefined value for the memory slider
+        closest_value = min(self.predefined_values, key=lambda x: abs(x - memory_value))
+
+        # Update the slider to the closest predefined value
+        self.MemorySlider.setValue(closest_value)
+
+        # Display in MB or GB format
+        if closest_value >= 1024:
+            # If the value is over or equal to 1 GB, display in GB
+            self.MemoryStat.setText(f"{closest_value // 1024}GB")
+        else:
+            # Otherwise, display in MB
+            self.MemoryStat.setText(f"{closest_value}MB")
+
+        # Update JVM arguments
+        self.update_jvm_args(closest_value)
+        print(self.jvm_args)
+
+    def update_jvm_args(self, memory_value):
+        # Convert memory value to GB if it's greater than or equal to 1024 MB (1 GB)
+        if memory_value >= 1024:
+            memory_in_gb = memory_value // 1024
+            self.jvm_args = [f"-Xmx{memory_in_gb}G", f"-Xms{memory_in_gb}G"]
+        else:
+            # If the memory value is less than 1 GB, keep it in MB
+            self.jvm_args = [f"-Xmx{memory_value}M", f"-Xms{memory_value}M"]
+
+    def update_pathtojavaexe(self):
+        self.current_path=self.PathToJava.text()
+    
+    def update_versionStates(self):
+        checkbox_map = {
+            self.Releases: "ShowReleases",
+            self.BetaVersions: "ShowBetaVersions",
+            self.RCVersions: "ShowRCVersions",
+            self.Snapshots: "ShowSnapshots",
+            self.PreReleases: "ShowPreReleases",
+            self.AlphaVersions: "ShowAlphaVersions"
+        }
+
+        any_checked = False
+
+        for checkbox, attribute_name in checkbox_map.items():
+            if checkbox.isChecked():
+                setattr(self, attribute_name, False)
+                any_checked = True
+            else:
+                setattr(self, attribute_name, True)
+
+        if not any_checked:
+            for attribute_name in checkbox_map.values():
+                setattr(self, attribute_name, True)
+
+    def select_java_exe(self):
+        options = QtWidgets.QFileDialog.Options()
+        file, _ = QtWidgets.QFileDialog.getOpenFileName(
+            None, "Select a File", "", "Java file (java.exe)", options=options
+        )
+        if file:
+            self.PathToJava.setText(file)
+    
+    def start_login(self):
+        asyncio.create_task(self.perform_login())
+
+    async def perform_login(self):
+        try:
+            result = await self.authenticator.login_with_webview()
+            if result:
+                print("Login successful")
+
+        except MicrosoftAuthenticationException as e:
+            print("Authentication failed:", e)
+
+    def on_checkbox_state_change(self):
+        if self.LicenseProfile.isChecked() and self.CrackedProfile.isChecked()==False:
+            self.LicenseProfile.setDisabled(True)
+            self.start_login()
+        elif self.LicenseProfile.isEnabled()==False and self.CrackedProfile.isChecked():
+            self.LicenseProfile.setChecked(False)
+            self.LicenseProfile.setDisabled(False)
+            if os.path.exists(self.auth_data_file):
+                try:
+                    os.remove(self.auth_data_file)
+                    print(f"{self.auth_data_file} has been deleted.")
+                except Exception as e:
+                    print(f"Error deleting {self.auth_data_file}: {e}")
+            else:
+                print(f"{self.auth_data_file} does not exist.")
+        elif self.LicenseProfile.isChecked() and self.CrackedProfile.isChecked():
+            self.LicenseProfile.setChecked(True)
+            self.LicenseProfile.setEnabled(False)
+            self.CrackedProfile.setChecked(False)
+
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        latest_version = minecraft_launcher_lib.utils.get_latest_version()
+        model = QStandardItemModel()
+        minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft', 'unixlauncher')
+
+        def LicenseStateTask():
+            while True:
+                self.IsLicense = self.check_license()
+                time.sleep(1)
+                if self.IsLicense:
+                    #print("License mode enabled. Using auth_data.json.")
+                    if os.path.exists("auth_data.json"):
+                        with open('auth_data.json', 'r', encoding='utf-8') as file:
+                            self.license_data = json.load(file)
+                        self.nicknameEdit.setText(self.license_data.get("username"))
+                        self.nicknameEdit.setDisabled(True)
+                    else:
+                        #print("file not faundsdsfaf.ioauygh4ufigjdbf")
+                        self.load_username()
+                        self.nicknameEdit.setDisabled(False)
+                else:
+                    """тут кароче чота нужна чтобы все норм была без ошибак вот"""
+
+        thread = threading.Thread(target=LicenseStateTask)
+        thread.start()
 
         MainWindow.setWindowTitle("Unix Launcher")
         MainWindow.setObjectName("MainWindow")
@@ -182,6 +597,19 @@ class Ui_MainWindow(object):
         self.folderButton.enterEvent=self.folderButtonEnterEvent
         self.folderButton.leaveEvent=self.folderButtonLeaveEvent
         self.folderButton.clicked.connect(self.open_directory)
+
+        self.settingsButton = QtWidgets.QPushButton(self.centralwidget)
+        self.settingsButton.setGeometry(QtCore.QRect(923, 509, 22, 22))
+        self.settingsButton.setStyleSheet("background: transparent;")
+        self.settingsButton.setText("")
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap("assets/settingsButton.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.settingsButton.setIcon(icon2)
+        self.settingsButton.setIconSize(QtCore.QSize(22, 22))
+        self.settingsButton.setObjectName("settingsButton")
+        self.settingsButton.enterEvent=self.settingsButtonEnterEvent
+        self.settingsButton.leaveEvent=self.settingsButtonLeaveEvent
+        self.settingsButton.clicked.connect(self.open_settings)
 
         self.GeneralBG = QtWidgets.QLabel(self.centralwidget)
         self.GeneralBG.setGeometry(QtCore.QRect(686, 60, 290, 474))
@@ -301,7 +729,16 @@ class Ui_MainWindow(object):
 
         for version in minecraft_launcher_lib.utils.get_version_list():
             self.versionSelectBox.addItem(version["id"])
-        
+            item = QStandardItem(version["id"])
+            version_directory = os.path.join(minecraft_directory, 'versions', version["id"])
+
+            if os.path.exists(version_directory): item.setForeground(QtGui.QColor("white"))
+            else: item.setForeground(QtGui.QColor("gray"))
+
+            model.appendRow(item)
+
+        self.versionSelectBox.setModel(model)
+
         self.versionInfo = QtWidgets.QLabel(self.centralwidget)
         self.versionInfo.setGeometry(QtCore.QRect(705, 220, 256, 31))
         self.versionInfo.setStyleSheet("""
@@ -343,7 +780,7 @@ class Ui_MainWindow(object):
                 padding: 4px;
         }
         QProgressBar::chunk {
-                background-color: #00B051;
+                background-color: #2196F3;
                 border-radius: 7px; 
         }
         """)
@@ -362,10 +799,10 @@ class Ui_MainWindow(object):
         QPushButton {
             background: transparent;
             color: white;
-            border: 2px solid #cccccc;
+            border: 2px solid white;
             border-radius: 9px;
             padding: 5px;
-            font-size: 18px;
+            font: 63 14pt "Bahnschrift SemiBold";
         }
             QPushButton:hover {
             background-color: #555;
@@ -381,10 +818,10 @@ class Ui_MainWindow(object):
         QPushButton {
             background: transparent;
             color: white;
-            border: 2px solid #cccccc;
+            border: 2px solid white;
             border-radius: 9px;
             padding: 5px;
-            font-size: 18px;
+            font: 63 14pt "Bahnschrift SemiBold";
         }
             QPushButton:hover {
             background-color: #555;
@@ -400,10 +837,10 @@ class Ui_MainWindow(object):
         QPushButton {
             background: transparent;
             color: white;
-            border: 2px solid #cccccc;
+            border: 2px solid white;
             border-radius: 9px;
             padding: 5px;
-            font-size: 18px;
+            font: 63 14pt "Bahnschrift SemiBold";
         }
             QPushButton:hover {
             background-color: #555;
@@ -419,10 +856,10 @@ class Ui_MainWindow(object):
         QPushButton {
             background: transparent;
             color: white;
-            border: 2px solid #cccccc;
+            border: 2px solid white;
             border-radius: 9px;
             padding: 5px;
-            font-size: 18px;
+            font: 63 14pt "Bahnschrift SemiBold";
         }
             QPushButton:hover {
             background-color: #555;
@@ -460,31 +897,32 @@ class Ui_MainWindow(object):
         self.versionInfo.raise_()
         self.loaderInfo.raise_()
         self.progressBar.raise_()
-
         self.playButton.setText("Play")
         self.stopButton.setText("Stop")
+        self.settingsButton.raise_()
         self.nicknameEdit.setPlaceholderText("Enter nickname")
-
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.launch_thread = LaunchThread()
         self.launch_thread.progress_update_signal.connect(self.update_progress)
         self.launch_thread.state_update_signal.connect(self.state_update)
+
+        self.create_unixlauncher_directory()      
+        self.versionSelectBox.currentIndexChanged.connect(self.update_version_info)        
+
         self.timer = QTimer()
         self.timer.timeout.connect(self.hide_progress_bar)
-
-        self.create_unixlauncher_directory()
 
         saved_username = self.load_username()
         if saved_username:
             self.nicknameEdit.setText(saved_username)
 
-        self.versionSelectBox.currentIndexChanged.connect(self.update_version_info)
-
         self.is_dragging = False
         self.drag_start_pos = None
-        
-    #Main Functions:
+
+    def check_license(self):
+        return os.path.exists("auth_data.json")
+
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
             self.is_dragging = True
@@ -516,8 +954,7 @@ class Ui_MainWindow(object):
         username = self.nicknameEdit.text()
         if username:
             self.save_username(username)
-        loader_type = self.loaderInfo.text().split(": ")[-1]  # Получение типа загрузчика из loaderInfo
-        self.launch_thread.launch_setup_signal.emit(self.versionSelectBox.currentText(), username, loader_type)
+        self.launch_thread.launch_setup_signal.emit(self.versionSelectBox.currentText(), username, self.nicknameEdit, self.IsLicense)
         self.launch_thread.start()
         self.stopButton.setVisible(True)
         self.playButton.setDisabled(True)
@@ -537,7 +974,7 @@ class Ui_MainWindow(object):
             percentage = 0
         self.progressBar.setValue(progress)
         self.progressBar.setMaximum(max_progress)
-        text = f"{percentage}% - {label}"
+        text = f"{percentage}%"
         self.progressBar.setFormat(text)
 
     def open_directory(self):
@@ -580,7 +1017,6 @@ class Ui_MainWindow(object):
         self.playButton.setEnabled(True)
         self.launch_thread.stop_signal.emit()
 
-    #Hover Events:
     def CloseButtonEnterEvent(self, event):
         self.closeButton.setIcon(QtGui.QIcon("assets/CloseButtonHover.png"))
 
@@ -598,6 +1034,16 @@ class Ui_MainWindow(object):
 
     def folderButtonLeaveEvent(self, event):
         self.folderButton.setIcon(QtGui.QIcon("assets/FolderButton.png"))
+        
+    def settingsButtonEnterEvent(self, event):
+        self.settingsButton.setIcon(QtGui.QIcon("assets/settingsButtonHover.png"))
+
+    def settingsButtonLeaveEvent(self, event):
+        self.settingsButton.setIcon(QtGui.QIcon("assets/settingsButton.png"))
+
+    def open_settings(self):
+        self.settings_window = SettingsWindow()
+        self.settings_window.show()
 
 if __name__ == "__main__":
     import sys
@@ -607,3 +1053,7 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
+    loop = QEventLoop(app)
+    asyncio.set_event_loop(loop)
+    with loop:
+        sys.exit(loop.run_forever())
