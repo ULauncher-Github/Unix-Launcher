@@ -26,7 +26,7 @@ class CenterDelegate(QStyledItemDelegate):
         super().initStyleOption(option, index)
         option.displayAlignment = Qt.AlignCenter
 
-#License Login System (i pasted that thing from internet)
+#License Login System (i pasted that thing from internet and i dont know what is that garbage doing, but its working)
 class MicrosoftAuthenticationException(Exception):
     pass
 
@@ -146,7 +146,7 @@ class LoginFrame(QMainWindow):
             self.future.set_exception(MicrosoftAuthenticationException("User closed the authentication window"))
         event.accept()
 
-#Main thread to launch da game
+#Main thread to launch the game
 class LaunchThread(QtCore.QThread):
     launch_setup_signal = QtCore.pyqtSignal(str, str, QLineEdit, bool)  
     progress_update_signal = QtCore.pyqtSignal(int, int, str)
@@ -236,6 +236,7 @@ class LaunchThread(QtCore.QThread):
 
         finally:
             self.state_update_signal.emit(False)
+
 #Settings window
 class SettingsWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -467,7 +468,7 @@ class SettingsWindow(QtWidgets.QMainWindow):
             self.LicenseProfile.setEnabled(False)
             self.CrackedProfile.setChecked(False)
 
-#main launcher window
+#Main Window
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         model = QStandardItemModel()
@@ -710,7 +711,7 @@ class Ui_MainWindow(object):
         """)
         self.versionSelectBox.setEditable(True)
         line_edit = self.versionSelectBox.lineEdit()
-        line_edit.setAlignment(Qt.AlignCenter) #wtf is that thing lol, literally me doesnt know abt that
+        line_edit.setAlignment(Qt.AlignCenter)
         line_edit.setReadOnly(True)
         delegate = CenterDelegate(self.versionSelectBox)
         self.versionSelectBox.setItemDelegate(delegate)
@@ -720,7 +721,7 @@ class Ui_MainWindow(object):
             self.versionSelectBox.addItem(version["id"])
             item = QStandardItem(version["id"])
             version_directory = os.path.join(minecraft_directory, 'versions', version["id"])
-            if os.path.exists(version_directory): item.setForeground(QtGui.QColor("white")) #that thingy so buggy, maybe ill change it soon
+            if os.path.exists(version_directory): item.setForeground(QtGui.QColor("white"))
             else: item.setForeground(QtGui.QColor("gray"))
             model.appendRow(item)
         self.versionSelectBox.setModel(model)
