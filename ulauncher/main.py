@@ -1,35 +1,32 @@
-try:
-    from PyQt5 import QtCore, QtGui, QtWidgets
-    import os
-    import subprocess
-    from uuid import uuid1
-    from random_username.generate import generate_username
-    import minecraft_launcher_lib
-    from PyQt5.QtCore import QTimer, Qt
-    from PyQt5.QtWidgets import QApplication, QComboBox, QStyledItemDelegate, QVBoxLayout, QWidget, QLineEdit
-    from PyQt5.QtCore import Qt, QPoint
-    import json
-    import pygetwindow as gw
-    import time
-    from PyQt5.QtGui import QStandardItem, QStandardItemModel
-    import psutil
-    from asyncqt import QEventLoop
-    import asyncio
-    import requests
-    from urllib.parse import urlparse, parse_qs, unquote
-    from PyQt5.QtWidgets import QApplication, QMainWindow
-    from PyQt5.QtCore import QUrl, pyqtSlot
-    from PyQt5.QtWebEngineWidgets import QWebEngineView
-    import threading
-except Exception as e:
-    code = os.system("python.exe -m pip install -r requirements.txt") #requirements doesnt updated.
-    print(e)
+from PyQt5 import QtCore, QtGui, QtWidgets
+import os
+import subprocess
+from uuid import uuid1
+from random_username.generate import generate_username
+import minecraft_launcher_lib
+from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtWidgets import QApplication, QComboBox, QStyledItemDelegate, QVBoxLayout, QWidget, QLineEdit
+from PyQt5.QtCore import Qt, QPoint
+import json
+import time
+from PyQt5.QtGui import QStandardItem, QStandardItemModel
+import psutil
+from asyncqt import QEventLoop
+import asyncio
+import requests
+from urllib.parse import urlparse, parse_qs, unquote
+from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtCore import QUrl, pyqtSlot
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+import threading
 
+#Centered Text In ComboBox thing
 class CenterDelegate(QStyledItemDelegate):
     def initStyleOption(self, option, index):
         super().initStyleOption(option, index)
         option.displayAlignment = Qt.AlignCenter
 
+#License Login System (i pasted that thing from internet)
 class MicrosoftAuthenticationException(Exception):
     pass
 
@@ -149,6 +146,7 @@ class LoginFrame(QMainWindow):
             self.future.set_exception(MicrosoftAuthenticationException("User closed the authentication window"))
         event.accept()
 
+#Main thread to launch da game
 class LaunchThread(QtCore.QThread):
     launch_setup_signal = QtCore.pyqtSignal(str, str, QLineEdit, bool)  
     progress_update_signal = QtCore.pyqtSignal(int, int, str)
@@ -238,7 +236,7 @@ class LaunchThread(QtCore.QThread):
 
         finally:
             self.state_update_signal.emit(False)
-
+#Settings window
 class SettingsWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(SettingsWindow, self).__init__()
@@ -383,7 +381,6 @@ class SettingsWindow(QtWidgets.QMainWindow):
         self.MemoryStat.setText(f"{self.MemorySlider.value()}MB")
         self.SelectJavaExeButton.setText("Select Java Exe")
 
-
     def update_memory_stat(self):
         memory_value = self.MemorySlider.value()
         closest_value = min(self.predefined_values, key=lambda x: abs(x - memory_value))
@@ -470,10 +467,16 @@ class SettingsWindow(QtWidgets.QMainWindow):
             self.LicenseProfile.setEnabled(False)
             self.CrackedProfile.setChecked(False)
 
+#main launcher window
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         model = QStandardItemModel()
         minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft', 'unixlauncher')
+        self.timer = QTimer()
+        self.is_dragging = False
+        self.drag_start_pos = None
+        self.launch_thread = LaunchThread()
+        saved_username = self.load_username()
 
         def LicenseStateTask():
             while True:
@@ -487,11 +490,11 @@ class Ui_MainWindow(object):
                         self.nicknameEdit.setText(self.license_data.get("username"))
                         self.nicknameEdit.setDisabled(True)
                     else:
-                        #print("file not faundsdsfaf.ioauygh4ufigjdbf")
+                        #print("file not found")
                         self.load_username()
                         self.nicknameEdit.setDisabled(False)
                 else:
-                    """тут кароче чота нужна чтобы все норм была без ошибак вот"""
+                    """i need to put something here or else that thing will give error :D"""
 
         thread = threading.Thread(target=LicenseStateTask)
         thread.start()
@@ -504,12 +507,12 @@ class Ui_MainWindow(object):
         MainWindow.setStyleSheet("background-color: rgb(41, 46, 49);")
         MainWindow.setUnifiedTitleAndToolBarOnMac(False)
         MainWindow.setWindowFlags(Qt.FramelessWindowHint)
-        icon_path = "assets/Icon.png"
-        icon = QtGui.QIcon(icon_path)
-        MainWindow.setWindowIcon(icon)
-
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+        WindowIcon_path = "assets/Icon.png"
+        WindowIcon = QtGui.QIcon(WindowIcon_path)
+        MainWindow.setWindowIcon(WindowIcon)
+
         self.TopbarBG = QtWidgets.QLabel(self.centralwidget)
         self.TopbarBG.setGeometry(QtCore.QRect(0, 0, 980, 56))
         self.TopbarBG.setStyleSheet("background-color: rgba(33, 36, 41, 1)")
@@ -530,28 +533,28 @@ class Ui_MainWindow(object):
         self.closeButton.setGeometry(QtCore.QRect(931, 8, 40, 40))
         self.closeButton.setStyleSheet("background: transparent;")
         self.closeButton.setText("")
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("assets/CloseButton.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.closeButton.setIcon(icon)
+        self.closeButton.setIcon(closeButtonIcon)
         self.closeButton.setIconSize(QtCore.QSize(40, 40))
         self.closeButton.setFlat(False)
         self.closeButton.setObjectName("closeButton")
         self.closeButton.enterEvent=self.CloseButtonEnterEvent
         self.closeButton.leaveEvent=self.CloseButtonLeaveEvent
         self.closeButton.clicked.connect(self.close_window)
+        closeButtonIcon = QtGui.QIcon()
+        closeButtonIcon.addPixmap(QtGui.QPixmap("assets/CloseButton.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
 
         self.collapseButton = QtWidgets.QPushButton(self.centralwidget)
         self.collapseButton.setGeometry(QtCore.QRect(891, 26, 24, 4))
         self.collapseButton.setStyleSheet("background: transparent;")
         self.collapseButton.setText("")
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("assets/CollapseButton.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.collapseButton.setIcon(icon1)
+        self.collapseButton.setIcon(collapseButtonIcon)
         self.collapseButton.setIconSize(QtCore.QSize(24, 4))
         self.collapseButton.setObjectName("collapseButton")
         self.collapseButton.enterEvent=self.CollapseButtonEnterEvent
         self.collapseButton.leaveEvent=self.CollapseButtonLeaveEvent
         self.collapseButton.clicked.connect(self.minimize_window) 
+        collapseButtonIcon = QtGui.QIcon()
+        collapseButtonIcon.addPixmap(QtGui.QPixmap("assets/CollapseButton.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
 
         self.playButton = QtWidgets.QPushButton(self.centralwidget)
         self.playButton.setGeometry(QtCore.QRect(708, 468, 246, 38))
@@ -575,39 +578,39 @@ class Ui_MainWindow(object):
         self.folderButton.setGeometry(QtCore.QRect(948, 509, 22, 22))
         self.folderButton.setStyleSheet("background: transparent;")
         self.folderButton.setText("")
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("assets/FolderButton.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.folderButton.setIcon(icon2)
         self.folderButton.setIconSize(QtCore.QSize(22, 22))
         self.folderButton.setObjectName("folderButton")
         self.folderButton.enterEvent=self.folderButtonEnterEvent
         self.folderButton.leaveEvent=self.folderButtonLeaveEvent
         self.folderButton.clicked.connect(self.open_directory)
+        folderButtonIcon = QtGui.QIcon()
+        folderButtonIcon.addPixmap(QtGui.QPixmap("assets/FolderButton.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.folderButton.setIcon(folderButtonIcon)
 
         self.settingsButton = QtWidgets.QPushButton(self.centralwidget)
         self.settingsButton.setGeometry(QtCore.QRect(923, 509, 22, 22))
         self.settingsButton.setStyleSheet("background: transparent;")
         self.settingsButton.setText("")
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("assets/settingsButton.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.settingsButton.setIcon(icon2)
         self.settingsButton.setIconSize(QtCore.QSize(22, 22))
         self.settingsButton.setObjectName("settingsButton")
         self.settingsButton.enterEvent=self.settingsButtonEnterEvent
         self.settingsButton.leaveEvent=self.settingsButtonLeaveEvent
         self.settingsButton.clicked.connect(self.open_settings)
+        settingsButtonIcon = QtGui.QIcon()
+        settingsButtonIcon.addPixmap(QtGui.QPixmap("assets/settingsButton.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.settingsButton.setIcon(settingsButtonIcon)
 
-        self.GeneralBG = QtWidgets.QLabel(self.centralwidget)
-        self.GeneralBG.setGeometry(QtCore.QRect(686, 60, 290, 474))
-        self.GeneralBG.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.GeneralBG.setStyleSheet("""
+        self.GrayBG = QtWidgets.QLabel(self.centralwidget)
+        self.GrayBG.setGeometry(QtCore.QRect(686, 60, 290, 474))
+        self.GrayBG.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.GrayBG.setStyleSheet("""
         QLabel{
             background-color: rgba(35, 39, 43, 1);
             border-radius: 9px;
         }
         """)
-        self.GeneralBG.setText("")
-        self.GeneralBG.setObjectName("GeneralBG")
+        self.GrayBG.setText("")
+        self.GrayBG.setObjectName("GrayBG")
 
         self.stopButton = QtWidgets.QPushButton(self.centralwidget)
         self.stopButton.setEnabled(True)
@@ -707,7 +710,7 @@ class Ui_MainWindow(object):
         """)
         self.versionSelectBox.setEditable(True)
         line_edit = self.versionSelectBox.lineEdit()
-        line_edit.setAlignment(Qt.AlignCenter)
+        line_edit.setAlignment(Qt.AlignCenter) #wtf is that thing lol, literally me doesnt know abt that
         line_edit.setReadOnly(True)
         delegate = CenterDelegate(self.versionSelectBox)
         self.versionSelectBox.setItemDelegate(delegate)
@@ -717,12 +720,9 @@ class Ui_MainWindow(object):
             self.versionSelectBox.addItem(version["id"])
             item = QStandardItem(version["id"])
             version_directory = os.path.join(minecraft_directory, 'versions', version["id"])
-
-            if os.path.exists(version_directory): item.setForeground(QtGui.QColor("white"))
+            if os.path.exists(version_directory): item.setForeground(QtGui.QColor("white")) #that thingy so buggy, maybe ill change it soon
             else: item.setForeground(QtGui.QColor("gray"))
-
             model.appendRow(item)
-
         self.versionSelectBox.setModel(model)
 
         self.versionInfo = QtWidgets.QLabel(self.centralwidget)
@@ -860,11 +860,10 @@ class Ui_MainWindow(object):
         self.dropdownarrowicon.setText("")
         self.dropdownarrowicon.setPixmap(QtGui.QPixmap("assets/arrow_down.png"))
         self.dropdownarrowicon.setStyleSheet("background: transparent;")
-
         self.dropdownarrowicon.setAlignment(QtCore.Qt.AlignCenter)
         self.dropdownarrowicon.setObjectName("dropdownarrowicon")
 
-        self.GeneralBG.raise_()
+        self.GrayBG.raise_()
         self.TopbarBG.raise_()
         self.Logo.raise_()
         self.dropdownarrowicon.raise_()
@@ -889,22 +888,16 @@ class Ui_MainWindow(object):
         self.nicknameEdit.setPlaceholderText("Enter nickname")
         MainWindow.setCentralWidget(self.centralwidget)
 
-        self.launch_thread = LaunchThread()
         self.launch_thread.progress_update_signal.connect(self.update_progress)
         self.launch_thread.state_update_signal.connect(self.state_update)
 
         self.create_unixlauncher_directory()      
         self.versionSelectBox.currentIndexChanged.connect(self.update_version_info)        
 
-        self.timer = QTimer()
         self.timer.timeout.connect(self.hide_progress_bar)
 
-        saved_username = self.load_username()
         if saved_username:
             self.nicknameEdit.setText(saved_username)
-
-        self.is_dragging = False
-        self.drag_start_pos = None
 
     def check_license(self):
         return os.path.exists("auth_data.json")
@@ -992,7 +985,7 @@ class Ui_MainWindow(object):
         self.loaderInfo.setText('Loader: Vanilla')
 
     def close_window(self):
-        MainWindow.close()
+        os._exit(0)
 
     def minimize_window(self):
         MainWindow.showMinimized()
@@ -1038,8 +1031,8 @@ if __name__ == "__main__":
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
-    sys.exit(app.exec_())
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
     with loop:
         sys.exit(loop.run_forever())
+    sys.exit(app.exec_())
