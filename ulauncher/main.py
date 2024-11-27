@@ -973,7 +973,7 @@ class Ui_MainWindow(object):
         selected_version = self.versionSelectBox.currentText()
         self.versionInfo.setText(selected_version)
 
-    #all functions below are placeholder
+    #all functions below are placeholders
     def select_forge(self):
         self.loaderInfo.setText('Loader: Forge')
 
