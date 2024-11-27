@@ -444,7 +444,6 @@ class SettingsWindow(QtWidgets.QMainWindow):
             result = await self.authenticator.login_with_webview()
             if result:
                 print("Login successful")
-
         except MicrosoftAuthenticationException as e:
             print("Authentication failed:", e)
 
@@ -557,7 +556,7 @@ class Ui_MainWindow(object):
         collapseButtonIcon = QtGui.QIcon()
         collapseButtonIcon.addPixmap(QtGui.QPixmap("assets/CollapseButton.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.collapseButton.setIcon(collapseButtonIcon)
-        
+
         self.playButton = QtWidgets.QPushButton(self.centralwidget)
         self.playButton.setGeometry(QtCore.QRect(708, 468, 246, 38))
         self.playButton.setStyleSheet("""
