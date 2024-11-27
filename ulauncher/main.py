@@ -534,7 +534,6 @@ class Ui_MainWindow(object):
         self.closeButton.setGeometry(QtCore.QRect(931, 8, 40, 40))
         self.closeButton.setStyleSheet("background: transparent;")
         self.closeButton.setText("")
-        self.closeButton.setIcon(closeButtonIcon)
         self.closeButton.setIconSize(QtCore.QSize(40, 40))
         self.closeButton.setFlat(False)
         self.closeButton.setObjectName("closeButton")
@@ -543,12 +542,13 @@ class Ui_MainWindow(object):
         self.closeButton.clicked.connect(self.close_window)
         closeButtonIcon = QtGui.QIcon()
         closeButtonIcon.addPixmap(QtGui.QPixmap("assets/CloseButton.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.closeButton.setIcon(closeButtonIcon)
 
         self.collapseButton = QtWidgets.QPushButton(self.centralwidget)
         self.collapseButton.setGeometry(QtCore.QRect(891, 26, 24, 4))
         self.collapseButton.setStyleSheet("background: transparent;")
         self.collapseButton.setText("")
-        self.collapseButton.setIcon(collapseButtonIcon)
+        
         self.collapseButton.setIconSize(QtCore.QSize(24, 4))
         self.collapseButton.setObjectName("collapseButton")
         self.collapseButton.enterEvent=self.CollapseButtonEnterEvent
@@ -556,7 +556,8 @@ class Ui_MainWindow(object):
         self.collapseButton.clicked.connect(self.minimize_window) 
         collapseButtonIcon = QtGui.QIcon()
         collapseButtonIcon.addPixmap(QtGui.QPixmap("assets/CollapseButton.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-
+        self.collapseButton.setIcon(collapseButtonIcon)
+        
         self.playButton = QtWidgets.QPushButton(self.centralwidget)
         self.playButton.setGeometry(QtCore.QRect(708, 468, 246, 38))
         self.playButton.setStyleSheet("""
