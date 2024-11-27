@@ -63,7 +63,7 @@ class MicrosoftAuthenticator:
         profile = self.get_mc_profile(mc_token) if self.has_entitlement(mc_token) else None
         self.save_to_json(mc_token, profile)
         return {"profile": profile, "access_token": mc_token, "refresh_token": tokens.refresh_token}
-
+#test change
     def xbox_login(self, token):
         data = {"Properties": {"AuthMethod": "RPS", "SiteName": "user.auth.xboxlive.com", "RpsTicket": token},
                 "RelyingParty": "http://auth.xboxlive.com", "TokenType": "JWT"}
