@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>413</width>
+    <height>167</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(41, 46, 49);</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLabel" name="Memory_Label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>20</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white;</string>
+    </property>
+    <property name="text">
+     <string>Memory</string>
+    </property>
+   </widget>
+   <widget class="QSlider" name="MemorySlider">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>17</y>
+      <width>160</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="PathToJava">
+    <property name="geometry">
+     <rect>
+      <x>75</x>
+      <y>47</y>
+      <width>201</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">                background: transparent;
+                border-radius: 7px;
+                border: 2px solid white;
+                color: white;
+                font: 63 10pt &quot;Bahnschrift SemiBold&quot;;
+                text-align: center;</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="JavaPath_Label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>50</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white;</string>
+    </property>
+    <property name="text">
+     <string>Java Path</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="Releases">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>115</y>
+      <width>101</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white;</string>
+    </property>
+    <property name="text">
+     <string>Hide Releases</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="BetaVersions">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>140</y>
+      <width>121</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white;</string>
+    </property>
+    <property name="text">
+     <string>Hide Beta Versions</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="RCVersions">
+    <property name="geometry">
+     <rect>
+      <x>147</x>
+      <y>140</y>
+      <width>111</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white;</string>
+    </property>
+    <property name="text">
+     <string>Hide RC Versions</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="Snapshots">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>115</y>
+      <width>121</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white;</string>
+    </property>
+    <property name="text">
+     <string>Hide Snapshots</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="PreReleases">
+    <property name="geometry">
+     <rect>
+      <x>147</x>
+      <y>115</y>
+      <width>111</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white;</string>
+    </property>
+    <property name="text">
+     <string>Hide Pre-releases</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="AlphaVersions">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>140</y>
+      <width>131</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white;</string>
+    </property>
+    <property name="text">
+     <string>Hide Alpha Versions</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="LicenseProfile">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>20</y>
+      <width>101</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white;</string>
+    </property>
+    <property name="text">
+     <string>License Profile</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="CrackedProfile">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>50</y>
+      <width>101</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white;</string>
+    </property>
+    <property name="text">
+     <string>Cracked Profile</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="MemoryStat">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>20</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white;</string>
+    </property>
+    <property name="text">
+     <string>0MB</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="SelectJavaPathButton">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>80</y>
+      <width>381</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">        QPushButton {
+            background-color: rgba(70, 173, 226, 1);
+            border-radius: 7px;
+            font: 63 8pt &quot;Bahnschrift SemiBold&quot;;
+            color: white;
+        }
+
+        QPushButton:Hover {
+            background-color: rgba(56, 139, 181, 1)
+        }</string>
+    </property>
+    <property name="text">
+     <string>Select Java Path</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

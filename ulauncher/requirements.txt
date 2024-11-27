@@ -1,4 +1,9 @@
-pyqt5
-minecraft-launcher-lib
+PyQt5
 uuid
-random-username
+random_username
+minecraft_launcher_lib
+psutil
+asyncqt
+asyncio
+requests
+PyQtWebEngine
