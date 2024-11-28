@@ -1036,5 +1036,5 @@ if __name__ == "__main__":
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
     with loop:
-        sys.exit(loop.run_forever())
-    sys.exit(app.exec_())
+        os._exit(loop.run_forever())
+    sys.exit(os._exit(0))
