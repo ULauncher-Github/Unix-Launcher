@@ -32,4 +32,4 @@ Modern antivirus programs use **heuristic analysis** to detect suspicious files 
 #### 5. **Why It’s Not a Virus**
 The executable contains **only your code** and does not include any harmful behavior. False positives are common due to the nature of PyInstaller and the way antivirus software works.
 
-(text created using chatgpt dont kill me)
+# *(text created using chatgpt dont kill me)*
