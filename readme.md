@@ -1,7 +1,7 @@
 ### ULauncher Dev
 Unix Launcher is an experiment, is it possible to make a good well-designed minecraft launcher in python only?
-Check out our discord! https://discord.gg/BVpWyqr8E3
-If you found any bugs type them into issues or join to our discord server and write bug into "Bug" Forum.
+Check out our discord! [Discord](https://discord.gg/BVpWyqr8E3) (all news here)
+If you found any bugs, write them in issues or join our discord server, go to the `support` category, create a new ticket and describe the bug you found (discord server is for Russians only, don't worry, we have English chat and we will translate your problem for you).
 
 ---
 
