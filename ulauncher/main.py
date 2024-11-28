@@ -341,13 +341,13 @@ class SettingsWindow(QtWidgets.QMainWindow):
         self.LicenseProfile.setGeometry(QtCore.QRect(300, 20, 101, 17))
         self.LicenseProfile.setStyleSheet("color: white;")
         self.LicenseProfile.setObjectName("LicenseProfile")
-        self.LicenseProfile.stateChanged.connect(self.on_checkbox_state_change)
+        self.LicenseProfile.stateChanged.connect(self.ProfileChangerHandle)
 
         self.CrackedProfile = QtWidgets.QCheckBox(self.centralwidget)
         self.CrackedProfile.setGeometry(QtCore.QRect(300, 50, 101, 17))
         self.CrackedProfile.setStyleSheet("color: white;")
         self.CrackedProfile.setObjectName("CrackedProfile")
-        self.CrackedProfile.stateChanged.connect(self.on_checkbox_state_change)
+        self.CrackedProfile.stateChanged.connect(self.ProfileChangerHandle)
 
         if os.path.exists("auth_data.json"):
             self.LicenseProfile.setChecked(True)
@@ -446,22 +446,32 @@ class SettingsWindow(QtWidgets.QMainWindow):
         except MicrosoftAuthenticationException as e:
             print("Authentication failed:", e)
 
-    def on_checkbox_state_change(self):
-        if self.LicenseProfile.isChecked() and self.CrackedProfile.isChecked()==False:
+    def delete_auth_data_file(self):
+        if os.path.exists(self.auth_data_file):
+            try:
+                os.remove(self.auth_data_file)
+                print(f"{self.auth_data_file} has been deleted.")
+            except Exception as e:
+                print(f"Error deleting {self.auth_data_file}: {e}")
+        else:
+            print(f"{self.auth_data_file} does not exist.")
+
+    def ProfileChangerHandle(self):
+        license_checked = self.LicenseProfile.isChecked()
+        cracked_checked = self.CrackedProfile.isChecked()
+        license_enabled = self.LicenseProfile.isEnabled()
+
+        if license_checked and not cracked_checked:
+            # Enable License Profile
             self.LicenseProfile.setDisabled(True)
             self.start_login()
-        elif self.LicenseProfile.isEnabled()==False and self.CrackedProfile.isChecked():
+        elif not license_enabled and cracked_checked:
+            # Enable Cracked Profile
             self.LicenseProfile.setChecked(False)
             self.LicenseProfile.setDisabled(False)
-            if os.path.exists(self.auth_data_file):
-                try:
-                    os.remove(self.auth_data_file)
-                    print(f"{self.auth_data_file} has been deleted.")
-                except Exception as e:
-                    print(f"Error deleting {self.auth_data_file}: {e}")
-            else:
-                print(f"{self.auth_data_file} does not exist.")
-        elif self.LicenseProfile.isChecked() and self.CrackedProfile.isChecked():
+            self.delete_auth_data_file()
+        elif license_checked and cracked_checked:
+            # Force License Profile
             self.LicenseProfile.setChecked(True)
             self.LicenseProfile.setEnabled(False)
             self.CrackedProfile.setChecked(False)
