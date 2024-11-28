@@ -1036,4 +1036,4 @@ if __name__ == "__main__":
     asyncio.set_event_loop(loop)
     with loop:
         os._exit(loop.run_forever())
-    sys.exit(os._exit(0))
+    os._exit(0)
