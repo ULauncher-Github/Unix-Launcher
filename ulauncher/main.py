@@ -275,7 +275,6 @@ class SettingsWindow(QtWidgets.QMainWindow):
         self.MemorySlider.setTickInterval(512)
         self.MemorySlider.setPageStep(512)
         self.predefined_values = [512 * i for i in range(1, (max_memory_mb // 512) + 1)]
-        self.jvm_args = []
         self.MemorySlider.valueChanged.connect(self.update_memory_stat)
 
         self.MemoryStat = QtWidgets.QLabel(self.centralwidget)
