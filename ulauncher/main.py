@@ -191,12 +191,13 @@ class LaunchThread(QtCore.QThread):
     def run(self):
         if os.path.exists('settings_data.json'):
             with open('settings_data.json', 'r') as f:
-                self.jvm_args = json.load(f).get("jvmArguments")
+                self.settingsData = json.load(f)
         else:
             """need to put something here or else it will give error :D"""
 
         print(self.IsLicense)
-        print(self.jvm_args)
+        print(self.settingsData.get("jvmArguments"))
+        print(self.settingsData.get("java_path"))
         minecraft_version = self.version_id
         minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft', 'unixlauncher')
         self.state_update_signal.emit(True)
@@ -221,14 +222,16 @@ class LaunchThread(QtCore.QThread):
                     'username': license_data.get("username"),
                     'uuid': license_data.get("uuid"),
                     'token': license_data.get("access_token"),
-                    'jvmArguments': self.jvm_args
+                    'jvmArguments': self.settingsData.get("jvmArguments"),
+                    'executablePath': self.settingsData.get("java_path")
                 }
             else:
                 options = {
                     'username': self.username,
                     'uuid': str(uuid1()),
                     'token': "",
-                    'jvmArguments': self.jvm_args
+                    'jvmArguments': self.settingsData.get("jvmArguments"),
+                    'executablePath': self.settingsData.get("java_path")
                 }
 
             command = minecraft_launcher_lib.command.get_minecraft_command(
