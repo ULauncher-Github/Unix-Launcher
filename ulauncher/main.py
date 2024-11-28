@@ -543,6 +543,12 @@ class Ui_MainWindow(object):
         self.launch_thread = LaunchThread()
         saved_username = self.load_username()
 
+        if os.path.exists('settings_data.json'):
+            with open('settings_data.json', 'r') as f:
+                self.settingsData = json.load(f)
+        else:
+            """need to put something here or else it will give error :D"""
+
         def LicenseStateTask():
             while True:
                 self.IsLicense = self.check_license()
@@ -1050,7 +1056,8 @@ class Ui_MainWindow(object):
 
     def select_Vanilla(self):
         self.loaderInfo.setText('Loader: Vanilla')
-
+    #placeholders functions end
+    
     def close_window(self):
         os._exit(0)
 
