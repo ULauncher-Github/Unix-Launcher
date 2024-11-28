@@ -189,7 +189,14 @@ class LaunchThread(QtCore.QThread):
         self.terminate()
 
     def run(self):
+        if os.path.exists('settings_data.json'):
+            with open('settings_data.json', 'r') as f:
+                self.jvm_args = json.load(f).get("jvmArguments")
+        else:
+            """need to put something here or else it will give error :D"""
+
         print(self.IsLicense)
+        print(self.jvm_args)
         minecraft_version = self.version_id
         minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft', 'unixlauncher')
         self.state_update_signal.emit(True)
@@ -214,12 +221,14 @@ class LaunchThread(QtCore.QThread):
                     'username': license_data.get("username"),
                     'uuid': license_data.get("uuid"),
                     'token': license_data.get("access_token"),
+                    'jvmArguments': self.jvm_args
                 }
             else:
                 options = {
                     'username': self.username,
                     'uuid': str(uuid1()),
                     'token': "",
+                    'jvmArguments': self.jvm_args
                 }
 
             command = minecraft_launcher_lib.command.get_minecraft_command(
@@ -268,13 +277,13 @@ class SettingsWindow(QtWidgets.QMainWindow):
         self.MemorySlider.setGeometry(QtCore.QRect(70, 17, 160, 21))
         self.MemorySlider.setOrientation(QtCore.Qt.Horizontal)
         self.MemorySlider.setObjectName("MemorySlider")
-        self.MemorySlider.setMinimum(512)
+        self.MemorySlider.setMinimum(1024)
         max_memory_mb = psutil.virtual_memory().total // (1024 * 1024)
         self.MemorySlider.setMaximum(max_memory_mb)
         self.MemorySlider.setTickPosition(QtWidgets.QSlider.TicksBelow)
-        self.MemorySlider.setTickInterval(512)
-        self.MemorySlider.setPageStep(512)
-        self.predefined_values = [512 * i for i in range(1, (max_memory_mb // 512) + 1)]
+        self.MemorySlider.setTickInterval(1024)
+        self.MemorySlider.setPageStep(1024)
+        self.predefined_values = [1024 * i for i in range(1, (max_memory_mb // 1024) + 1)]
         self.MemorySlider.valueChanged.connect(self.update_memory_stat)
 
         self.MemoryStat = QtWidgets.QLabel(self.centralwidget)
@@ -1090,4 +1099,4 @@ if __name__ == "__main__":
     asyncio.set_event_loop(loop)
     with loop:
         os._exit(loop.run_forever())
-    os._exit(0)
+    sys.exit(os._exit(0))
