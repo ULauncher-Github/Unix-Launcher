@@ -381,6 +381,45 @@ class SettingsWindow(QtWidgets.QMainWindow):
         self.MemoryStat.setText(f"{self.MemorySlider.value()}MB")
         self.SelectJavaExeButton.setText("Select Java Exe")
 
+        self.load_settings()
+
+    def save_settings(self):
+        settings = {
+            "memory": self.MemorySlider.value(),
+            "jvmArguments": self.jvm_args,
+            "java_path": self.PathToJava.text(),
+            "show_releases": not self.Releases.isChecked(),
+            "show_beta": not self.BetaVersions.isChecked(),
+            "show_rc": not self.RCVersions.isChecked(),
+            "show_snapshots": not self.Snapshots.isChecked(),
+            "show_pre_releases": not self.PreReleases.isChecked(),
+            "show_alpha": not self.AlphaVersions.isChecked(),
+            "license_profile": self.LicenseProfile.isChecked(),
+            "cracked_profile": self.CrackedProfile.isChecked()
+        }
+        
+        try:
+            with open('settings_data.json', 'w') as f:
+                json.dump(settings, f, indent=4)
+        except Exception as e:
+            print(f"Error saving settings: {e}")
+
+    def load_settings(self):
+        try:
+            if os.path.exists('settings_data.json'):
+                with open('settings_data.json', 'r') as f:
+                    settings = json.load(f)
+                self.MemorySlider.setValue(settings.get('memory', 512))
+                self.PathToJava.setText(settings.get('java_path', ''))
+                self.Releases.setChecked(not settings.get('show_releases', True))
+                self.BetaVersions.setChecked(not settings.get('show_beta', True))
+                self.RCVersions.setChecked(not settings.get('show_rc', True))
+                self.Snapshots.setChecked(not settings.get('show_snapshots', True))
+                self.PreReleases.setChecked(not settings.get('show_pre_releases', True))
+                self.AlphaVersions.setChecked(not settings.get('show_alpha', True))
+        except Exception as e:
+            print(f"Error loading settings: {e}")
+
     def update_memory_stat(self):
         memory_value = self.MemorySlider.value()
         closest_value = min(self.predefined_values, key=lambda x: abs(x - memory_value))
@@ -393,6 +432,7 @@ class SettingsWindow(QtWidgets.QMainWindow):
 
         self.update_jvm_args(closest_value)
         print(self.jvm_args)
+        self.save_settings()
 
     def update_jvm_args(self, memory_value):
         if memory_value >= 1024:
@@ -400,9 +440,11 @@ class SettingsWindow(QtWidgets.QMainWindow):
             self.jvm_args = [f"-Xmx{memory_in_gb}G", f"-Xms{memory_in_gb}G"]
         else:
             self.jvm_args = [f"-Xmx{memory_value}M", f"-Xms{memory_value}M"]
+        self.save_settings()
 
     def update_pathtojavaexe(self):
         self.current_path=self.PathToJava.text()
+        self.save_settings()
     
     def update_versionStates(self):
         checkbox_map = {
@@ -426,6 +468,7 @@ class SettingsWindow(QtWidgets.QMainWindow):
         if not any_checked:
             for attribute_name in checkbox_map.values():
                 setattr(self, attribute_name, True)
+        self.save_settings()
 
     def select_java_exe(self):
         options = QtWidgets.QFileDialog.Options()
@@ -434,6 +477,7 @@ class SettingsWindow(QtWidgets.QMainWindow):
         )
         if file:
             self.PathToJava.setText(file)
+        self.save_settings()
     
     def start_login(self):
         asyncio.create_task(self.perform_login())
