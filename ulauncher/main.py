@@ -325,30 +325,48 @@ class SettingsWindow(QtWidgets.QMainWindow):
         self.BetaVersions.setObjectName("BetaVersions")
         self.BetaVersions.stateChanged.connect(self.update_versionStates)
 
-        self.RCVersions = QtWidgets.QCheckBox(self.centralwidget)
-        self.RCVersions.setGeometry(QtCore.QRect(147, 140, 111, 17))
-        self.RCVersions.setStyleSheet("color: white;")
-        self.RCVersions.setObjectName("RCVersions")
-        self.RCVersions.stateChanged.connect(self.update_versionStates)
-
         self.Snapshots = QtWidgets.QCheckBox(self.centralwidget)
-        self.Snapshots.setGeometry(QtCore.QRect(270, 115, 121, 17))
+        self.Snapshots.setGeometry(QtCore.QRect(150, 115, 121, 17))
         self.Snapshots.setStyleSheet("color: white;")
         self.Snapshots.setObjectName("Snapshots")
         self.Snapshots.stateChanged.connect(self.update_versionStates)
 
-        self.PreReleases = QtWidgets.QCheckBox(self.centralwidget)
-        self.PreReleases.setGeometry(QtCore.QRect(147, 115, 111, 17))
-        self.PreReleases.setStyleSheet("color: white;")
-        self.PreReleases.setObjectName("PreReleases")
-        self.PreReleases.stateChanged.connect(self.update_versionStates)
+        self.resolutionLine1 = QtWidgets.QLineEdit(self.centralwidget)
+        self.resolutionLine1.setGeometry(QtCore.QRect(280, 115, 51, 20))
+        self.resolutionLine1.setStyleSheet("                background: transparent;\n"
+"                border-radius: 7px;\n"
+"                border: 2px solid white;\n"
+"                color: white;\n"
+"                font: 63 10pt \"Bahnschrift SemiBold\";\n"
+"                text-align: center;")
+        self.resolutionLine1.setObjectName("resolutionLine1")
+
+        self.xLabel = QtWidgets.QLabel(self.centralwidget)
+        self.xLabel.setGeometry(QtCore.QRect(338, 113, 10, 20))
+        self.xLabel.setStyleSheet("color: white")
+        self.xLabel.setObjectName("xLabel")
+
+        self.resolutionLine2 = QtWidgets.QLineEdit(self.centralwidget)
+        self.resolutionLine2.setGeometry(QtCore.QRect(350, 115, 51, 20))
+        self.resolutionLine2.setStyleSheet("                background: transparent;\n"
+"                border-radius: 7px;\n"
+"                border: 2px solid white;\n"
+"                color: white;\n"
+"                font: 63 10pt \"Bahnschrift SemiBold\";\n"
+"                text-align: center;")
+        self.resolutionLine2.setObjectName("resolutionLine2")
         
         self.AlphaVersions = QtWidgets.QCheckBox(self.centralwidget)
-        self.AlphaVersions.setGeometry(QtCore.QRect(270, 140, 131, 17))
+        self.AlphaVersions.setGeometry(QtCore.QRect(150, 140, 131, 17))
         self.AlphaVersions.setStyleSheet("color: white;")
         self.AlphaVersions.setObjectName("AlphaVersions")
         self.AlphaVersions.stateChanged.connect(self.update_versionStates)
         
+        self.FullScreenCheckBox = QtWidgets.QCheckBox(self.centralwidget)
+        self.FullScreenCheckBox.setGeometry(QtCore.QRect(283, 140, 131, 17))
+        self.FullScreenCheckBox.setStyleSheet("color: white;")
+        self.FullScreenCheckBox.setObjectName("FullScreenCheckBox")
+
         self.LicenseProfile = QtWidgets.QCheckBox(self.centralwidget)
         self.LicenseProfile.setGeometry(QtCore.QRect(300, 20, 101, 17))
         self.LicenseProfile.setStyleSheet("color: white;")
@@ -382,16 +400,19 @@ class SettingsWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.centralwidget)
         self.Memory_Label.setText("Memory")
         self.JavaPath_Label.setText("Java Exe")
-        self.Releases.setText("Hide Releases")
-        self.BetaVersions.setText("Hide Beta Versions")
-        self.RCVersions.setText("Hide RC Versions")
-        self.Snapshots.setText("Hide Snapshots")
-        self.PreReleases.setText("Hide Pre-releases")
-        self.AlphaVersions.setText("Hide Alpha Versions")
+        self.Releases.setText("Show Releases")
+        self.BetaVersions.setText("Show Beta Versions")
+        self.Snapshots.setText("Show Snapshots")
+        self.AlphaVersions.setText("Show Alpha Versions")
         self.LicenseProfile.setText("License Profile")
         self.CrackedProfile.setText("Cracked Profile")
+        self.xLabel.setText("x")
+        self.FullScreenCheckBox.setText("Launch In Fullscreen")
         self.MemoryStat.setText(f"{self.MemorySlider.value()}MB")
         self.SelectJavaExeButton.setText("Select Java Exe")
+        validator = QtGui.QIntValidator()
+        self.resolutionLine1.setValidator(validator)
+        self.resolutionLine2.setValidator(validator)
 
         self.load_settings()
 
@@ -402,9 +423,7 @@ class SettingsWindow(QtWidgets.QMainWindow):
             "java_path": self.PathToJava.text(),
             "show_releases": not self.Releases.isChecked(),
             "show_beta": not self.BetaVersions.isChecked(),
-            "show_rc": not self.RCVersions.isChecked(),
             "show_snapshots": not self.Snapshots.isChecked(),
-            "show_pre_releases": not self.PreReleases.isChecked(),
             "show_alpha": not self.AlphaVersions.isChecked(),
             "license_profile": self.LicenseProfile.isChecked(),
             "cracked_profile": self.CrackedProfile.isChecked()
@@ -425,9 +444,7 @@ class SettingsWindow(QtWidgets.QMainWindow):
                 self.PathToJava.setText(settings.get('java_path', ''))
                 self.Releases.setChecked(not settings.get('show_releases', True))
                 self.BetaVersions.setChecked(not settings.get('show_beta', True))
-                self.RCVersions.setChecked(not settings.get('show_rc', True))
                 self.Snapshots.setChecked(not settings.get('show_snapshots', True))
-                self.PreReleases.setChecked(not settings.get('show_pre_releases', True))
                 self.AlphaVersions.setChecked(not settings.get('show_alpha', True))
         except Exception as e:
             print(f"Error loading settings: {e}")
@@ -462,9 +479,7 @@ class SettingsWindow(QtWidgets.QMainWindow):
         checkbox_map = {
             self.Releases: "ShowReleases",
             self.BetaVersions: "ShowBetaVersions",
-            self.RCVersions: "ShowRCVersions",
             self.Snapshots: "ShowSnapshots",
-            self.PreReleases: "ShowPreReleases",
             self.AlphaVersions: "ShowAlphaVersions"
         }
 
