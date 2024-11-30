@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtCore import QUrl, pyqtSlot
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 import threading
+import traceback
 
 #Centered Text In ComboBox thing
 class CenterDelegate(QStyledItemDelegate):
@@ -193,11 +194,8 @@ class LaunchThread(QtCore.QThread):
             with open('settings_data.json', 'r') as f:
                 self.settingsData = json.load(f)
         else:
-            """need to put something here or else it will give error :D"""
+            print("please open settings and configure it")
 
-        print(self.IsLicense)
-        print(self.settingsData.get("jvmArguments"))
-        print(self.settingsData.get("java_path"))
         minecraft_version = self.version_id
         minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft', 'unixlauncher')
         self.state_update_signal.emit(True)
@@ -215,7 +213,7 @@ class LaunchThread(QtCore.QThread):
             if not self.username:
                 self.username = generate_username()[0]
 
-            if self.IsLicense==True:
+            if self.IsLicense:
                 with open('auth_data.json', 'r', encoding='utf-8') as file:
                     license_data = json.load(file)
                 options = {
@@ -223,7 +221,10 @@ class LaunchThread(QtCore.QThread):
                     'uuid': license_data.get("uuid"),
                     'token': license_data.get("access_token"),
                     'jvmArguments': self.settingsData.get("jvmArguments"),
-                    'executablePath': self.settingsData.get("java_path")
+                    'executablePath': self.settingsData.get("java_path"),
+                    'customResolution': True,
+                    'resolutionWidth': str(self.settingsData.get("resolutionWidth", 1280)),
+                    'resolutionHeight': str(self.settingsData.get("resolutionHeight", 720))
                 }
             else:
                 options = {
@@ -231,7 +232,10 @@ class LaunchThread(QtCore.QThread):
                     'uuid': str(uuid1()),
                     'token': "",
                     'jvmArguments': self.settingsData.get("jvmArguments"),
-                    'executablePath': self.settingsData.get("java_path")
+                    'executablePath': self.settingsData.get("java_path"),
+                    'customResolution': True,
+                    'resolutionWidth': str(self.settingsData.get("resolutionWidth", 1280)),
+                    'resolutionHeight': str(self.settingsData.get("resolutionHeight", 720))
                 }
 
             command = minecraft_launcher_lib.command.get_minecraft_command(
@@ -244,7 +248,10 @@ class LaunchThread(QtCore.QThread):
                 subprocess.Popen(command, creationflags=subprocess.CREATE_NO_WINDOW)
 
         except Exception as e:
-            print(f"Error during Minecraft launch: {str(e)}")
+            print("Error during Minecraft launch:")
+            print(f"Exception: {str(e)}")
+            print("Traceback:")
+            traceback.print_exc()
 
         finally:
             self.state_update_signal.emit(False)
@@ -413,6 +420,8 @@ class SettingsWindow(QtWidgets.QMainWindow):
         validator = QtGui.QIntValidator()
         self.resolutionLine1.setValidator(validator)
         self.resolutionLine2.setValidator(validator)
+        self.resolutionLine1.textChanged.connect(self.update_resolution_width)
+        self.resolutionLine2.textChanged.connect(self.update_resolution_height)
 
         self.load_settings()
 
@@ -425,10 +434,10 @@ class SettingsWindow(QtWidgets.QMainWindow):
             "show_beta": not self.BetaVersions.isChecked(),
             "show_snapshots": not self.Snapshots.isChecked(),
             "show_alpha": not self.AlphaVersions.isChecked(),
-            "license_profile": self.LicenseProfile.isChecked(),
-            "cracked_profile": self.CrackedProfile.isChecked()
+            "resolutionWidth": int(self.resolutionLine1.text()) if self.resolutionLine1.text().isdigit() else 1280,
+            "resolutionHeight": int(self.resolutionLine2.text()) if self.resolutionLine2.text().isdigit() else 720,
+            "fullscreen": self.FullScreenCheckBox.isChecked(),
         }
-        
         try:
             with open('settings_data.json', 'w') as f:
                 json.dump(settings, f, indent=4)
@@ -446,8 +455,19 @@ class SettingsWindow(QtWidgets.QMainWindow):
                 self.BetaVersions.setChecked(not settings.get('show_beta', True))
                 self.Snapshots.setChecked(not settings.get('show_snapshots', True))
                 self.AlphaVersions.setChecked(not settings.get('show_alpha', True))
+                self.resolutionLine1.setText(str(settings.get("resolutionWidth", 1280)))
+                self.resolutionLine2.setText(str(settings.get("resolutionHeight", 720)))
+                self.FullScreenCheckBox.setChecked(settings.get("fullscreen", False))
         except Exception as e:
             print(f"Error loading settings: {e}")
+
+    def update_resolution_width(self, text):
+        if text.isdigit():
+            self.save_settings()
+
+    def update_resolution_height(self, text):
+        if text.isdigit():
+            self.save_settings()
 
     def update_memory_stat(self):
         memory_value = self.MemorySlider.value()
