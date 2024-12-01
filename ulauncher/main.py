@@ -222,6 +222,44 @@ class LaunchThread(QtCore.QThread):
         self.stopping = True
         self.terminate()
 
+    def update_fullscreen_option(self):
+        settings_file_path = 'settings_data.json'
+
+        if os.path.exists(settings_file_path):
+            with open(settings_file_path, 'r') as json_file:
+                settings_data = json.load(json_file)
+
+            fullscreen_value = settings_data.get("fullscreen", None)
+            
+            if fullscreen_value is None:
+                print("fullscreen option not found in JSON file.")
+                return
+
+            roaming_directory = os.path.join(os.getenv('APPDATA'), '.unixlauncher')
+            options_file_path = os.path.join(roaming_directory, 'options.txt')
+
+            if os.path.exists(options_file_path):
+                with open(options_file_path, 'r') as file:
+                    lines = file.readlines()
+
+                updated = False
+                with open(options_file_path, 'w') as file:
+                    for line in lines:
+                        if 'fullscreen:' in line:
+                            file.write(f'fullscreen:{str(fullscreen_value).lower()}\n')
+                            updated = True
+                        else:
+                            file.write(line)
+
+                if updated:
+                    print(f"fullscreen mode set to {fullscreen_value}")
+                else:
+                    print("fullscreen option not found in options.txt")
+            else:
+                print(f"File {options_file_path} doesn't exist.")
+        else:
+            print(f"JSON settings file {settings_file_path} doesn't exist.")
+
     def run(self):
         javaw_finder = JavawFinder(thread_count=1)
         path_to_javaw = javaw_finder.find_javaw_multithreaded()
@@ -229,12 +267,13 @@ class LaunchThread(QtCore.QThread):
         if os.path.exists('settings_data.json'):
             with open('settings_data.json', 'r') as f:
                 self.settingsData = json.load(f)
+
         #if settings data json file doesnt exists it will give error, so... Im creating new one as defaults.
         else:
             print("settings isn't configured, using defaults")
             settings = {
-                "memory": 2048,
-                "jvmArguments": ['-Xmx2G', '-Xms2G'],
+                "memory": 3072,
+                "jvmArguments": ['-Xmx3G', '-Xms3G'],
                 "java_path": path_to_javaw.replace("\\", "/"),
                 "show_releases": False,
                 "show_beta": False,
@@ -251,7 +290,7 @@ class LaunchThread(QtCore.QThread):
             except Exception as e:
                 print(f"Error saving settings: {e}")
                 self.settingsData = {}
-            
+
         minecraft_version = self.version_id
         minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft', 'unixlauncher')
         self.state_update_signal.emit(True)
@@ -293,6 +332,8 @@ class LaunchThread(QtCore.QThread):
                     'resolutionWidth': str(self.settingsData.get("resolutionWidth", 1280)),
                     'resolutionHeight': str(self.settingsData.get("resolutionHeight", 720))
                 }
+
+            self.update_fullscreen_option()
 
             command = minecraft_launcher_lib.command.get_minecraft_command(
                 version=self.version_id,
@@ -478,6 +519,7 @@ class SettingsWindow(QtWidgets.QMainWindow):
         self.resolutionLine2.setValidator(validator)
         self.resolutionLine1.textChanged.connect(self.update_resolution_width)
         self.resolutionLine2.textChanged.connect(self.update_resolution_height)
+        self.FullScreenCheckBox.stateChanged.connect(self.save_settings)
 
         self.load_settings()
 
