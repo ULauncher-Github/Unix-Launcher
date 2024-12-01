@@ -20,6 +20,7 @@ from PyQt5.QtCore import QUrl, pyqtSlot
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 import threading
 import traceback
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 #Centered Text In ComboBox thing
 class CenterDelegate(QStyledItemDelegate):
@@ -147,6 +148,38 @@ class LoginFrame(QMainWindow):
             self.future.set_exception(MicrosoftAuthenticationException("User closed the authentication window"))
         event.accept()
 
+# find javaw.exe on pc to use it as default java path
+class JavawFinder:
+    def __init__(self, thread_count=5):
+        self.thread_count = thread_count
+
+    def find_javaw(self):
+        try:
+            result = subprocess.run(
+                ["where", "javaw.exe"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                shell=True
+            )
+            
+            if result.returncode == 0:
+                return result.stdout.strip()
+            else:
+                return None
+        except Exception as e:
+            return f"An error occurred: {e}"
+
+    def find_javaw_multithreaded(self):
+        with ThreadPoolExecutor(max_workers=self.thread_count) as executor:
+            # Launch multiple threads
+            futures = [executor.submit(self.find_javaw) for _ in range(self.thread_count)]
+            for future in as_completed(futures):
+                result = future.result()
+                if result:
+                    return result
+        return "javaw.exe not found. Ensure Java is installed and added to PATH."
+
 #Main thread to launch the game
 class LaunchThread(QtCore.QThread):
     launch_setup_signal = QtCore.pyqtSignal(str, str, QLineEdit, bool)  
@@ -190,12 +223,35 @@ class LaunchThread(QtCore.QThread):
         self.terminate()
 
     def run(self):
+        javaw_finder = JavawFinder(thread_count=1)
+        path_to_javaw = javaw_finder.find_javaw_multithreaded()
+
         if os.path.exists('settings_data.json'):
             with open('settings_data.json', 'r') as f:
                 self.settingsData = json.load(f)
+        #if settings data json file doesnt exists it will give error, so... Im creating new one as defaults.
         else:
-            print("please open settings and configure it")
-
+            print("settings isn't configured, using defaults")
+            settings = {
+                "memory": 2048,
+                "jvmArguments": ['-Xmx2G', '-Xms2G'],
+                "java_path": path_to_javaw.replace("\\", "/"),
+                "show_releases": False,
+                "show_beta": False,
+                "show_snapshots": False,
+                "show_alpha": False,
+                "resolutionWidth": 1280,
+                "resolutionHeight": 720,
+                "fullscreen": False,
+            }
+            try:
+                with open('settings_data.json', 'w') as f:
+                    json.dump(settings, f, indent=4)
+                self.settingsData = settings
+            except Exception as e:
+                print(f"Error saving settings: {e}")
+                self.settingsData = {}
+            
         minecraft_version = self.version_id
         minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft', 'unixlauncher')
         self.state_update_signal.emit(True)
@@ -520,7 +576,7 @@ class SettingsWindow(QtWidgets.QMainWindow):
     def select_java_exe(self):
         options = QtWidgets.QFileDialog.Options()
         file, _ = QtWidgets.QFileDialog.getOpenFileName(
-            None, "Select a File", "", "Java file (java.exe)", options=options
+            None, "Select a File", "", "Java file (javaw.exe)", options=options
         )
         if file:
             self.PathToJava.setText(file)
