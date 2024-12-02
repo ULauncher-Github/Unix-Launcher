@@ -22,13 +22,11 @@ import threading
 import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-#Centered Text In ComboBox thing
 class CenterDelegate(QStyledItemDelegate):
     def initStyleOption(self, option, index):
         super().initStyleOption(option, index)
         option.displayAlignment = Qt.AlignCenter
 
-#License Login System (i pasted that thing from internet and i dont know what is that garbage doing, but its working)
 class MicrosoftAuthenticationException(Exception):
     pass
 
@@ -148,7 +146,6 @@ class LoginFrame(QMainWindow):
             self.future.set_exception(MicrosoftAuthenticationException("User closed the authentication window"))
         event.accept()
 
-# find javaw.exe on pc to use it as default java path
 class JavawFinder:
     def __init__(self, thread_count=5):
         self.thread_count = thread_count
@@ -172,7 +169,6 @@ class JavawFinder:
 
     def find_javaw_multithreaded(self):
         with ThreadPoolExecutor(max_workers=self.thread_count) as executor:
-            # Launch multiple threads
             futures = [executor.submit(self.find_javaw) for _ in range(self.thread_count)]
             for future in as_completed(futures):
                 result = future.result()
@@ -180,7 +176,6 @@ class JavawFinder:
                     return result
         return "javaw.exe not found. Ensure Java is installed and added to PATH."
 
-#Main thread to launch the game
 class LaunchThread(QtCore.QThread):
     launch_setup_signal = QtCore.pyqtSignal(str, str, QLineEdit, bool)  
     progress_update_signal = QtCore.pyqtSignal(int, int, str)
@@ -268,7 +263,6 @@ class LaunchThread(QtCore.QThread):
             with open('settings_data.json', 'r') as f:
                 self.settingsData = json.load(f)
 
-        #if settings data json file doesnt exists it will give error, so... Im creating new one as defaults.
         else:
             print("settings isn't configured, using defaults")
             settings = {
@@ -353,7 +347,6 @@ class LaunchThread(QtCore.QThread):
         finally:
             self.state_update_signal.emit(False)
 
-#Settings window
 class SettingsWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(SettingsWindow, self).__init__()
@@ -665,7 +658,6 @@ class SettingsWindow(QtWidgets.QMainWindow):
             self.LicenseProfile.setEnabled(False)
             self.CrackedProfile.setChecked(False)
 
-#Main Window
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         model = QStandardItemModel()
@@ -681,14 +673,14 @@ class Ui_MainWindow(object):
                 self.IsLicense = self.check_license()
                 time.sleep(1)
                 if self.IsLicense:
-                    #print("License mode enabled. Using auth_data.json.")
+                    print("License mode enabled. Using auth_data.json.")
                     if os.path.exists("auth_data.json"):
                         with open('auth_data.json', 'r', encoding='utf-8') as file:
                             self.license_data = json.load(file)
                         self.nicknameEdit.setText(self.license_data.get("username"))
                         self.nicknameEdit.setDisabled(True)
                     else:
-                        #print("file not found")
+                        print("file not found")
                         self.load_username()
                         self.nicknameEdit.setDisabled(False)
                 else:
