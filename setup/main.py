@@ -266,57 +266,52 @@ class Ui_MainWindow(object):
 
         self.shortcutCheckBox = QtWidgets.QCheckBox(self.centralwidget)
         self.shortcutCheckBox.setGeometry(QtCore.QRect(330, 93, 221, 31))
-        self.shortcutCheckBox.setStyleSheet("QCheckBox {\n"
-        "    font: 63 12pt \"Bahnschrift SemiBold\";\n"
-        "    background: transparent;\n"
-        "    padding: 2px;\n"
-        "    color: white;\n"
-        "}\n"
-        "QCheckBox::indicator {\n"
-        "    width: 20px;\n"
-        "    height: 20px;\n"
-        "}\n"
-        "QCheckBox::indicator:unchecked {\n"
-        "    border: 2px solid white;\n"
-        "    background-color: none;\n"
-        "    border-radius: 7px;\n"
-        "}\n"
-        "QCheckBox::indicator:checked {\n"
-        "    border: 2px solid white;\n"
-        "    background: #0067C0;\n"
-        "    border-radius: 7px;\n"
-        "}\n"
-        "\n"
-        "QCheckBox::indicator::checked:hover {\n"
-        "    background:#0078D4;\n"
-        "}")
+        self.shortcutCheckBox.setStyleSheet("""
+            QCheckBox {
+                font: 63 12pt "Bahnschrift SemiBold";
+                background: transparent;
+                padding: 2px;
+                color: white;
+            }
+            QCheckBox::indicator {
+                width: 20px;
+                height: 20px;
+                border: 2px solid white;
+                background-color: none;
+                border-radius: 7px;                                            
+            }
+            QCheckBox::indicator:checked {
+                border: 2px solid white;
+                background-color: none;
+                border-radius: 7px;
+                image: url(assets/CheckMark.svg);
+            }
+        """)
         self.shortcutCheckBox.setObjectName("shortcutCheckBox")
+
         self.appCheckBox = QtWidgets.QCheckBox(self.centralwidget)
         self.appCheckBox.setGeometry(QtCore.QRect(330, 141, 231, 31))
-        self.appCheckBox.setStyleSheet("QCheckBox {\n"
-        "    font: 63 12pt \"Bahnschrift SemiBold\";\n"
-        "    background: transparent;\n"
-        "    padding: 2px;\n"
-        "    color: white;\n"
-        "}\n"
-        "QCheckBox::indicator {\n"
-        "    width: 20px;\n"
-        "    height: 20px;\n"
-        "}\n"
-        "QCheckBox::indicator:unchecked {\n"
-        "    border: 2px solid white;\n"
-        "    background-color: none;\n"
-        "    border-radius: 7px;\n"
-        "}\n"
-        "QCheckBox::indicator:checked {\n"
-        "    border: 2px solid white;\n"
-        "    background: #0067C0;\n"
-        "    border-radius: 7px;\n"
-        "}\n"
-        "\n"
-        "QCheckBox::indicator::checked:hover {\n"
-        "    background:#0078D4;\n"
-        "}")
+        self.appCheckBox.setStyleSheet("""
+            QCheckBox {
+                font: 63 12pt "Bahnschrift SemiBold";
+                background: transparent;
+                padding: 2px;
+                color: white;
+            }
+            QCheckBox::indicator {
+                width: 20px;
+                height: 20px;
+                border: 2px solid white;
+                background-color: none;
+                border-radius: 7px;                                            
+            }
+            QCheckBox::indicator:checked {
+                border: 2px solid white;
+                background-color: none;
+                border-radius: 7px;
+                image: url(assets/CheckMark.svg);
+            }
+        """)
 
         MainWindow.setCentralWidget(self.centralwidget)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
