@@ -252,7 +252,7 @@ class Ui_MainWindow(object):
         "}\n"
         "\n"
         "QProgressBar::chunk {\n"
-        "    background-color: #00B051;\n"
+        "    background-color: #2196F3;\n"
         "    border-radius: 7px; \n"
         "}\n"
         "")
@@ -332,6 +332,7 @@ class Ui_MainWindow(object):
         self.installButton.setStyleSheet("background-color: grey; border-radius: 7px; border: 2px solid black; font: 63 14pt 'Bahnschrift SemiBold'; color: white;")
         self.pathButton.setEnabled(False)
         self.pathButton.setStyleSheet("background-color: grey; border-radius: 7px; border: 2px solid black; font: 63 14pt 'Bahnschrift SemiBold'; color: white;")
+        self.pathText.setText("")
         create_shortcut = self.shortcutCheckBox.isChecked()
         open_app = self.appCheckBox.isChecked()
         self.worker = InstallationWorker(self.install_path or os.getcwd(), create_shortcut, open_app)
@@ -345,6 +346,7 @@ class Ui_MainWindow(object):
         self.installButton.setStyleSheet("background-color: rgba(70, 173, 226, 1); border-radius: 7px; border: 2px solid black; font: 63 14pt 'Bahnschrift SemiBold'; color: white;")
         self.pathButton.setEnabled(True)
         self.pathButton.setStyleSheet("background: transparent; color: white;")
+        self.pathText.setText("Select Path")
 
     def close_application(self):
         MainWindow.close()
