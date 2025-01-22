@@ -266,8 +266,8 @@ class LaunchThread(QtCore.QThread):
         else:
             print("settings isn't configured, using defaults")
             settings = {
-                "memory": 3072,
-                "jvmArguments": ['-Xmx3G', '-Xms3G'],
+                "memory": 2048,
+                "jvmArguments": ['-Xmx2G', '-Xms2G'],
                 "java_path": path_to_javaw.replace("\\", "/"),
                 "show_releases": False,
                 "show_beta": False,
@@ -353,7 +353,35 @@ class SettingsWindow(QtWidgets.QMainWindow):
         self.authenticator = MicrosoftAuthenticator()
         self.loop = QEventLoop()
         asyncio.set_event_loop(self.loop)
-        self.auth_data_file = "auth_data.json"
+        self.auth_data_file = "auth_data.json"     
+        javaw_finder = JavawFinder(thread_count=1)
+        path_to_javaw = javaw_finder.find_javaw_multithreaded()
+
+        if os.path.exists('settings_data.json'):
+            with open('settings_data.json', 'r') as f:
+                self.settingsData = json.load(f)
+
+        else:
+            print("settings isn't configured, using defaults")
+            settings = {
+                "memory": 2048,
+                "jvmArguments": ['-Xmx2G', '-Xms2G'],
+                "java_path": path_to_javaw.replace("\\", "/"),
+                "show_releases": False,
+                "show_beta": False,
+                "show_snapshots": False,
+                "show_alpha": False,
+                "resolutionWidth": 1280,
+                "resolutionHeight": 720,
+                "fullscreen": False,
+            }
+            try:
+                with open('settings_data.json', 'w') as f:
+                    json.dump(settings, f, indent=4)
+                self.settingsData = settings
+            except Exception as e:
+                print(f"Error saving settings: {e}")
+                self.settingsData = {}
 
         self.setObjectName("MainWindow")
         self.resize(413, 167)
