@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Unix-Launcher Download</title>
+    <title>Unix Launcher Download</title>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 
@@ -77,7 +77,7 @@
       }
 
       .content button {
-          background-color: #5865f2;
+          background-color: #7ce38b;
           border: 0;
           width: 200px;
           height: 36px;
@@ -90,7 +90,7 @@
       }
 
       .content button:hover {
-          background-color: #4752c4;
+          background-color: #449d51;
       }
 
       .content button i {
@@ -227,33 +227,56 @@
     </div>
     <div class="container">
       <div class="content dynamic">
-        <p class="big"><b>Unix-Launcher</b></p>
+        <p class="big"><b>Unix Launcher</b></p>
         <p>
-          Tori Client is currently in <b>OPEN BETA</b>. While Tori is now available for free to use, the client is far
-          from a finished product and is actively open for users to test out what we have so far. We request that if you
-          find any issues to please contact us and let us know so everyone can benefit from a better experience.<br /><br /><i
-            style="color: #ff4e4e;"
-            >Tori Client will never support cracked accounts.</i
-          >
-        </p>
+          Unix Launcher is an simple launcher that can run minecraft. Our launcher typed on python <i>(programming language)</i> and it having very well desing created using pyqt5, pyqt designer and css! That's all about our launcher. Download it below now! <br /><br />
+          <span style="color: #ffe438;">Our launcher is an <b>experiment</b> and doesn't having full launcher experience.</span>
+        </p>        
         <div class="button-row">
-          <button class="gray" id="download-btn-countdown">Wait...</button>
-          <button onclick="downloadAnyway();" class="download" id="download-btn">
+          <button onclick="download();" id="download-btn">
             <i class="fa-brands fa-windows"></i> Download
           </button>
         </div>
         <p class="small">
-          Tori Client only supports Windows at the moment. MacOS and Linux is planned and will be available in the
+          Unix Launcher only supports Windows at the moment. MacOS and Linux is planned and will be available in the
           future.
         </p>
       </div>
     </div>
     <div class="footer-container">
       <div class="footer">
-        <button style="margin-left: 6px;" onclick="openTOS();">Terms of Service</button>
-        <button style="margin-right: 6px;" onclick="openThirdParty();">Third Party Credits</button>
+        <button style="margin-left: 6px;" onclick="openDiscord();">Our Discord Server</button>
+        <button style="margin-right: 6px;" onclick="openGithub();">Our Github Page</button>
       </div>
     </div>
-    <script src=""></script>
+    <script>
+        var devmode = false;
+        function download() {
+            fetch('https://api.github.com/repos/ULauncher-Github/Unix Launcher/releases/latest')
+                .then(response => response.json())
+                .then(data => {
+                    const zipUrl = data.assets.find(asset => asset.name.endsWith('.zip')).browser_download_url;
+                    window.open(zipUrl, '_blank').focus();
+                })
+                .catch(error => {
+                    console.error('Error fetching release:', error);
+                });
+        }
+        function openDiscord() {
+          window.open("https://discord.gg/y5wGSgSE44", '_blank').focus();
+        }
+        function openGithub() {
+          window.open("https://github.com/ULauncher-Github/Unix-Launcher/", '_blank').focus();
+        }
+        document.onreadystatechange = function() {
+            if (document.readyState == "complete" && devmode === false) {
+                setTimeout(() => {
+                    document.getElementById("loading-screen").style.opacity = 0;
+                    document.getElementById("loading-screen").style.pointerEvents = "none";
+                    setTimeout(() => {document.getElementById("loading-screen").style.display = "none";}, "1005");
+                }, "500");
+            } else {if(devmode === true) {document.getElementById("loading-screen").style.display = "none";}}
+        };
+    </script>
   </body>
 </html>
