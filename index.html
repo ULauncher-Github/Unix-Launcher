@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tori Client - Downloads</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+      * {
+          margin: 0;
+          padding: 0;
+          font-family: "Poppins", sans-serif;
+          user-select: none;
+      }
+
+      body {
+          height: 100vh;
+      }
+
+      .background video {
+          position: fixed;
+          right: 0;
+          bottom: 0;
+          min-width: 100%;
+          min-height: 100%;
+          transform: translateX(calc((100% - 100vw) / 2));
+      }
+
+      .background .darken {
+          width: 100%;
+          height: 100%;
+          position: fixed;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: 5;
+      }
+
+      .container {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+      }
+
+      .content {
+          width: 300px;
+          height: 150px;
+          color: #e7e7e7;
+          background-color: rgba(0, 0, 0, 0.25);
+          backdrop-filter: blur(10px);
+          z-index: 10;
+          position: fixed;
+          border-radius: 15px;
+          border: 2px solid #2b3040;
+          display: flex;
+          justify-content: center;
+          align-content: center;
+          flex-direction: column;
+          text-align: center;
+      }
+
+      .container .dynamic {
+          width: auto !important;
+          max-width: 700px;
+          height: auto !important;
+          padding-left: 24px;
+          padding-right: 24px;
+          margin-right: 12px;
+          margin-left: 12px;
+      }
+
+      .big {
+          font-size: 24px;
+          margin-top: 16px;
+          margin-bottom: 16px;
+      }
+
+      .content button {
+          background-color: #5865f2;
+          border: 0;
+          width: 200px;
+          height: 36px;
+          border-radius: 8px;
+          font-size: 16px;
+          margin-top: 12px;
+          cursor: pointer;
+          transition: 0.3s ease;
+          margin-left: 50px;
+      }
+
+      .content button:hover {
+          background-color: #4752c4;
+      }
+
+      .content button i {
+          margin-right: 4px;
+      }
+
+      .loader {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          position: fixed;
+          z-index: 200;
+          background-color: #0d1117;
+          transition: 1s ease;
+      }
+
+      .loading-loader {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          display: inline-block;
+          border-top: 3px solid #222d3d;
+          border-right: 3px solid transparent;
+          box-sizing: border-box;
+          animation: rotation 1s linear infinite;
+        }
+
+      @keyframes rotation {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+      }
+
+      .footer-container {
+          display: flex;
+          justify-content: center;
+          height: 100%;
+          width: 100%;
+          position: fixed;
+          z-index: 20;
+      }
+
+      .footer {
+          background-color: rgba(0, 0, 0, 0.25);
+          backdrop-filter: blur(10px);
+          z-index: 15;
+          position: fixed;
+          height: 40px;
+          width: 300px;
+          bottom: 0;
+          margin-bottom: 24px;
+          border-radius: 12px;
+          border: 1px solid #2b3040;
+          display: flex;
+          justify-content: space-around;
+          align-items: center;
+      }
+
+      .footer button {
+          height: 25px;
+          border: 0;
+          color: #e7e7e7;
+          background-color: transparent;
+          cursor: pointer;
+          font-size: 13px;
+          padding-left: 12px;
+          padding-right: 12px;
+          border-radius: 5px;
+          transition: .3s ease;
+          padding-top: 2px;
+      }
+
+      .footer button:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .button-row {
+          display: flex;
+          justify-content: center;
+          column-gap: 16px;
+          margin-top: 24px;
+          margin-bottom: 10px;
+          align-items: center;
+          row-gap: 12px;
+      }
+
+      .button-row button {
+          margin: 0;
+      }
+
+      .store {
+          background-color: #cea5fb !important;
+      }
+
+      .download {
+          background-color: #7ce38b !important;
+          display: none;
+      }
+
+      @media (max-width: 450px) {
+          .button-row {
+              flex-direction: column;
+          }
+      }
+
+      .gray {
+          background-color: #494e53 !important;
+          cursor: not-allowed !important;
+      }
+
+      .small {
+          font-size: 12px;
+          color: #808080;
+          margin-bottom: 10px;
+      }
+    </style>
+    <script src="https://kit.fontawesome.com/b2ec349ebe.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/x-icon" href="/resource/favicon.ico" />
+  </head>
+  <body>
+    <div class="loader" id="loading-screen">
+      <div class="loading-loader"></div>
+    </div>
+    <div class="background">
+      <video src="https://toriclient.com/resource/d5dfafa9-3cfc-4970-8fdb-bf1875e6c3b2.mp4" autoplay muted loop>
+        Upgrade your browser man! Your browser doesn't support the video tag.
+      </video>
+      <div class="darken"></div>
+    </div>
+    <div class="container">
+      <div class="content dynamic">
+        <p class="big"><b>Read before downloading!</b></p>
+        <p>
+          Tori Client is currently in <b>OPEN BETA</b>. While Tori is now available for free to use, the client is far
+          from a finished product and is actively open for users to test out what we have so far. We request that if you
+          find any issues to please contact us and let us know so everyone can benefit from a better experience.<br /><br /><i
+            style="color: #ff4e4e;"
+            >Tori Client will never support cracked accounts.</i
+          >
+        </p>
+        <div class="button-row">
+          <button class="gray" id="download-btn-countdown">READ!!! PLEASE!!!</button>
+          <button onclick="downloadAnyway();" class="download" id="download-btn">
+            <i class="fa-brands fa-windows"></i> Download
+          </button>
+        </div>
+        <p class="small">
+          Tori Client only supports Windows at the moment. MacOS and Linux is planned and will be available in the
+          future.
+        </p>
+      </div>
+    </div>
+    <div class="footer-container">
+      <div class="footer">
+        <button style="margin-left: 6px;" onclick="openTOS();">Terms of Service</button>
+        <button style="margin-right: 6px;" onclick="openThirdParty();">Third Party Credits</button>
+      </div>
+    </div>
+    <script src="https://toriclient.com/13d4a0e3-3d2d-4d16-badf-08982d2a058a.js"></script>
+  </body>
+</html>
