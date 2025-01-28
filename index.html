@@ -252,11 +252,11 @@
     <script>
         var devmode = false;
         function download() {
-            fetch('https://api.github.com/repos/ULauncher-Github/Unix Launcher/releases/latest')
+            fetch('https://api.github.com/repos/ULauncher-Github/Unix-Launcher/releases/latest')
                 .then(response => response.json())
                 .then(data => {
                     const zipUrl = data.assets.find(asset => asset.name.endsWith('.zip')).browser_download_url;
-                    window.open(decodeURIComponent(zipUrl), '_blank').focus();
+                    window.open(zipUrl, '_blank').focus();
                 })
                 .catch(error => {
                     console.error('Error fetching release:', error);
